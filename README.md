@@ -40,7 +40,7 @@ The project implements a fully featured authentication & authorization system wi
 
 **Requirements**
 
-- [Node v20](https://nodejs.org/)
+- [Node v22](https://nodejs.org/)
 - [Docker](https://www.docker.com/) or [Rancher Desktop](https://rancherdesktop.io/)
 
 We are utilizing pnpm as our package manager.  Though, you can utilize npm if you prefer by running the equivalent npm commands.

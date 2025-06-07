@@ -1,12 +1,11 @@
 import { exec } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { glob, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 
 import { Generator as PalGenerator } from '@paljs/generator';
 import { Config as PalConfig } from '@paljs/types';
-import { glob } from 'glob';
 
 import {
   CaslPrismaSubjectsTemplate,
@@ -75,9 +74,8 @@ export class ZenGenerator {
     await pal.run();
 
     // Remove the `resolvers.ts` files
-    const resolversGlob = path.join(palOutPath, '**/resolvers.ts').replaceAll('\\', '/');
-    const resolversFiles = await glob(resolversGlob);
-    for (const file of resolversFiles) {
+    const resolversGlob = path.join(palOutPath, '**/resolvers.ts');
+    for await (const file of glob(resolversGlob)) {
       await rm(file);
     }
 
@@ -142,12 +140,12 @@ export class ZenGenerator {
     }
     console.log(`* Total resolver files wrote: ${wroteCount}`);
 
-    let prismaIndexFileNames = await this.getFileNames(prismaResolversPath);
+    const prismaIndexFileNames = await this.getFileNames(prismaResolversPath);
     const prismaIndexPath = path.join(prismaResolversPath, 'index.ts');
     await writeFile(prismaIndexPath, GraphQLPrismaIndexTemplate(prismaIndexFileNames));
     console.log(`- Wrote: ${prismaIndexPath}`);
 
-    let apiIndexFileNames = await this.getFileNames(apiResolversPath);
+    const apiIndexFileNames = await this.getFileNames(apiResolversPath);
     const apiIndexPath = path.join(apiResolversPath, 'index.ts');
     await writeFile(apiIndexPath, GraphQLApiIndexTemplate(apiIndexFileNames));
     console.log(`- Wrote: ${apiIndexPath}`);
@@ -211,7 +209,7 @@ export class ZenGenerator {
       let fieldsIndexSource = '';
       let fieldsFileNames = await this.getFileNames(fieldsPath);
       fieldsFileNames = fieldsFileNames.sort();
-      for (let fileName of fieldsFileNames) {
+      for (const fileName of fieldsFileNames) {
         fieldsIndexSource += `export * from './${fileName}';\n`;
       }
       const fieldsIndexPath = path.join(fieldsPath, `index.ts`);
