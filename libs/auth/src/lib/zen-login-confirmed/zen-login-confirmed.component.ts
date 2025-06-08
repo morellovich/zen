@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Environment } from '@zen/common';
 import { ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
@@ -18,14 +18,14 @@ import { token } from '../token.signal';
   imports: [ZenSnackbarModule],
 })
 export class ZenLoginConfirmedComponent {
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private env: Environment,
-    private auth: AuthService,
-    private snackbarError: ZenSnackbarError,
-    private authExchangeTokenGQL: AuthExchangeTokenGQL
-  ) {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private env = inject(Environment);
+  private auth = inject(AuthService);
+  private snackbarError = inject(ZenSnackbarError);
+  private authExchangeTokenGQL = inject(AuthExchangeTokenGQL);
+
+  constructor() {
     const query = this.route.snapshot.queryParams;
     const queryToken = decodeURIComponent(query['token']);
     token.set(queryToken);

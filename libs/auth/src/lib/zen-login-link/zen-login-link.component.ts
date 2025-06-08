@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { Observable, filter, map } from 'rxjs';
 
@@ -15,14 +15,13 @@ import { IfLoggedInDirective } from '../directives/if-logged-in.directive';
 export class ZenLoginLinkComponent {
   @Input() displayLogout = true;
   displayLogin$: Observable<boolean>;
+  auth = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    public auth: AuthService,
-    router: Router
-  ) {
+  constructor() {
     // only show the login link if not on the login page
-    this.displayLogin$ = router.events.pipe(
-      filter((event: any) => event instanceof NavigationEnd),
+    this.displayLogin$ = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
       map((event: NavigationEnd) => event.url.split('?')[0] !== '/login')
     );
   }

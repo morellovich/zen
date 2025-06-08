@@ -24,7 +24,12 @@
           }
         ],
         "styles": ["apps/portal/src/styles.scss"],
-        "scripts": []
+        "scripts": [],
+        "stylePreprocessorOptions": {
+          "sass": {
+            "silenceDeprecations": ["color-functions", "global-builtin", "import"]
+          }
+        }
       },
       "configurations": {
         "production": {

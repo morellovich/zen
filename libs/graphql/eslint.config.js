@@ -1,7 +1,9 @@
 const nx = require('@nx/eslint-plugin');
 const baseConfig = require('../../eslint.config.js');
+const { globalIgnores } = require('eslint/config');
 
 module.exports = [
+  globalIgnores(['libs/graphql/src/lib/apollo-angular.ts']),
   ...baseConfig,
   ...nx.configs['flat/angular'],
   ...nx.configs['flat/angular-template'],

@@ -1,9 +1,10 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { SampleSubscriptionGQL } from '@zen/graphql';
 import gql from 'graphql-tag';
 import { Subscription } from 'rxjs';
 
-const SampleSubscriptionDoc = gql`
+// eslint-disable-next-line  @typescript-eslint/no-unused-expressions
+gql`
   subscription SampleSubscription {
     sampleSubscription {
       message
@@ -17,10 +18,11 @@ const SampleSubscriptionDoc = gql`
   standalone: true,
 })
 export class ZenSampleSubscriptionComponent implements OnDestroy {
-  recentValue: any;
+  recentValue?: string;
   #sub: Subscription;
+  private sampleSubscriptionGQL = inject(SampleSubscriptionGQL);
 
-  constructor(private sampleSubscriptionGQL: SampleSubscriptionGQL) {
+  constructor() {
     this.#sub = this.sampleSubscriptionGQL.subscribe().subscribe(({ data }) => {
       this.recentValue = data?.sampleSubscription.message;
     });

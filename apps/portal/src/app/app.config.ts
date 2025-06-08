@@ -45,7 +45,8 @@ export const appConfig: ApplicationConfig = {
           uri: environment.url.graphql,
           mutationNames: ['SampleUpload', 'SampleUploadMany'],
           headers: { 'Apollo-Require-Preflight': 'true' },
-          fetch: (input: any, init: any) => {
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          fetch: (input, init: any) => {
             init.headers['Authorization'] = 'Bearer ' + token();
             return fetch(input, init);
           },

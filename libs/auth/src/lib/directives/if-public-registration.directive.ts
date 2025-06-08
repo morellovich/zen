@@ -1,4 +1,11 @@
-import { Directive, EmbeddedViewRef, Input, TemplateRef, ViewContainerRef } from '@angular/core';
+import {
+  Directive,
+  EmbeddedViewRef,
+  Input,
+  TemplateRef,
+  ViewContainerRef,
+  inject,
+} from '@angular/core';
 import { Environment } from '@zen/common';
 
 @Directive({
@@ -8,12 +15,11 @@ import { Environment } from '@zen/common';
 export class IfPublicRegistrationDirective {
   #embededViewRef: EmbeddedViewRef<unknown> | undefined;
   #ifPublicRegistration?: boolean | '';
+  #templateRef = inject(TemplateRef<unknown>);
+  #viewContainer = inject(ViewContainerRef);
+  #env = inject(Environment);
 
-  constructor(
-    private templateRef: TemplateRef<unknown>,
-    private viewContainer: ViewContainerRef,
-    private env: Environment
-  ) {
+  constructor() {
     this.update();
   }
 
@@ -29,8 +35,8 @@ export class IfPublicRegistrationDirective {
 
   update() {
     if (
-      (this.ifPublicRegistration && this.env.publicRegistration) ||
-      (!this.ifPublicRegistration && !this.env.publicRegistration)
+      (this.ifPublicRegistration && this.#env.publicRegistration) ||
+      (!this.ifPublicRegistration && !this.#env.publicRegistration)
     ) {
       this.render();
     } else {
@@ -40,11 +46,11 @@ export class IfPublicRegistrationDirective {
 
   render() {
     if (!this.#embededViewRef)
-      this.#embededViewRef = this.viewContainer.createEmbeddedView(this.templateRef);
+      this.#embededViewRef = this.#viewContainer.createEmbeddedView(this.#templateRef);
   }
 
   clear() {
-    this.viewContainer.clear();
+    this.#viewContainer.clear();
     this.#embededViewRef = undefined;
   }
 }

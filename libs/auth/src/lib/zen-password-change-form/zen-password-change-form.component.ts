@@ -5,6 +5,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import {
   FormControl,
@@ -17,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { ApolloError } from '@apollo/client/errors';
 import { ZenLoadingComponent } from '@zen/components';
 import { verticalAccordion } from '@zen/components/animations';
@@ -71,11 +72,9 @@ export class ZenPasswordChangeFormComponent implements OnDestroy {
       nonNullable: true,
     }),
   });
+  private authPasswordChangeGQL = inject(AuthPasswordChangeGQL);
 
-  constructor(
-    private authPasswordChangeGQL: AuthPasswordChangeGQL,
-    public router: Router
-  ) {
+  constructor() {
     const sub = this.oldPassword.valueChanges.subscribe(() => {
       this.#incorrectPassword = false;
       this.newPassword.updateValueAndValidity();

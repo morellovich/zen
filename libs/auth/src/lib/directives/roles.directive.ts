@@ -5,6 +5,7 @@ import {
   OnDestroy,
   TemplateRef,
   ViewContainerRef,
+  inject,
 } from '@angular/core';
 import { Role } from '@zen/common';
 import { Subscription } from 'rxjs';
@@ -19,13 +20,12 @@ export class RolesDirective implements OnDestroy {
   #roles?: string | string[];
   #embededViewRef: EmbeddedViewRef<unknown> | undefined;
   #sub: Subscription;
+  #templateRef = inject(TemplateRef<unknown>);
+  #viewContainer = inject(ViewContainerRef);
+  #auth = inject(AuthService);
 
-  constructor(
-    private templateRef: TemplateRef<unknown>,
-    private viewContainer: ViewContainerRef,
-    private auth: AuthService
-  ) {
-    this.#sub = this.auth.userRoles$.subscribe(() => this.update());
+  constructor() {
+    this.#sub = this.#auth.userRoles$.subscribe(() => this.update());
   }
 
   @Input()
@@ -38,7 +38,7 @@ export class RolesDirective implements OnDestroy {
     if (this.#roles === undefined || this.#roles === null) {
       this.render();
     } else {
-      if (this.auth.userHasRole(this.#roles)) {
+      if (this.#auth.userHasRole(this.#roles)) {
         this.render();
       } else {
         this.clear();
@@ -48,11 +48,11 @@ export class RolesDirective implements OnDestroy {
 
   render() {
     if (!this.#embededViewRef)
-      this.#embededViewRef = this.viewContainer.createEmbeddedView(this.templateRef);
+      this.#embededViewRef = this.#viewContainer.createEmbeddedView(this.#templateRef);
   }
 
   clear() {
-    this.viewContainer.clear();
+    this.#viewContainer.clear();
     this.#embededViewRef = undefined;
   }
 
