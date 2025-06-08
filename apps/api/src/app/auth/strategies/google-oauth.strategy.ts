@@ -13,7 +13,7 @@ export class GoogleOAuthStrategy extends PassportStrategy(Strategy, 'google') {
     config: ConfigService,
     private readonly prisma: PrismaService
   ) {
-    super(config.oauth!.google);
+    super(config.oauth!.google!);
   }
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
