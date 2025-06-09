@@ -15,7 +15,7 @@
   <mat-sidenav-content style="height: 100vh">
     <mat-toolbar class="bg-primary">
       @if(!drawerRef.opened || drawerRef.mode === 'over') {
-        <button (click)="drawerRef.toggle()" class="me-3" type="button" mat-icon-button>
+        <button type="button" matIconButton (click)="drawerRef.toggle()" class="me-3">
           <mat-icon>menu</mat-icon>
         </button>
       }
