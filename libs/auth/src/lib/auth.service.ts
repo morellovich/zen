@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApolloError } from '@apollo/client/errors';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { ApiError, Environment } from '@zen/common';
 import {
   AuthExchangeTokenGQL,
@@ -65,7 +65,7 @@ export class AuthService {
   #getAccountInfoGQL = inject(GetAccountInfoGQL);
   #router = inject(Router);
   #apollo = inject(Apollo);
-  #ability = inject(Ability);
+  #ability = inject(PureAbility);
   #authLoginGQL = inject(AuthLoginGQL);
   #authExchangeTokenGQL = inject(AuthExchangeTokenGQL);
   #env = inject(Environment);

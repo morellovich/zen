@@ -7,7 +7,7 @@ import {
   withEnabledBlockingInitialNavigation,
   withHashLocation,
 } from '@angular/router';
-import { Ability, PureAbility } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
 import { authInterceptorFn, token } from '@zen/auth';
 import { Environment } from '@zen/common';
@@ -25,12 +25,11 @@ export const appConfig: ApplicationConfig = {
     { provide: Environment, useValue: environment },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     {
-      provide: Ability,
+      provide: PureAbility,
       useValue: createPrismaAbility(undefined, {
         detectSubjectType: object => object['__typename'],
       }),
     },
-    { provide: PureAbility, useExisting: Ability },
     importProvidersFrom(
       ZenGraphQLModule.forRoot({
         cacheOptions: {
