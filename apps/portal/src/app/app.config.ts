@@ -42,7 +42,7 @@ export const appConfig: ApplicationConfig = {
         },
         uploadOptions: {
           uri: environment.url.graphql,
-          mutationNames: ['SampleUpload', 'SampleUploadMany'],
+          operationNames: ['SampleUpload', 'SampleUploadMany'],
           headers: { 'Apollo-Require-Preflight': 'true' },
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           fetch: (input, init: any) => {
