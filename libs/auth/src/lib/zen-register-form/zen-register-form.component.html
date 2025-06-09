@@ -4,7 +4,7 @@
   }
 
   @if(env.enableGoogleOAuth) {
-    <button type="button" (click)="loginWithGoogle()" mat-raised-button class="w-100 fs-4 py-1 my-2" [disabled]="loading">
+    <button type="button" matButton="elevated" (click)="loginWithGoogle()" class="w-100 fs-4 py-1 my-2" [disabled]="loading">
       <i class="fa-brands fa-fw fa-google me-1"></i>
       Sign up with Google
     </button>
@@ -43,14 +43,14 @@
   </mat-form-field>
 
   <div class="mb-4">
-    <mat-checkbox color="primary" [formControl]="acceptTerms">I accept the terms and conditions</mat-checkbox>
+    <mat-checkbox [formControl]="acceptTerms">I accept the terms and conditions</mat-checkbox>
     
     @if(acceptTerms.invalid && acceptTerms.touched) {
       <mat-error>Accept the terms and conditions</mat-error>
     }
   </div>
 
-  <button type="submit" mat-raised-button color="primary" class="w-100 fs-4 py-1" [disabled]="!form.valid">
+  <button type="submit" matButton="filled" class="w-100 fs-4 py-1" [disabled]="!form.valid">
     <i class="fa-solid fa-fw fa-cloud-upload-alt me-1"></i>
     Submit
   </button>
