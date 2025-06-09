@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 
 @Directive({
-  /* eslint-disable  @angular-eslint/directive-selector */
+  // eslint-disable-next-line  @angular-eslint/directive-selector
   selector: '[ifLoggedIn]',
   standalone: true,
 })
