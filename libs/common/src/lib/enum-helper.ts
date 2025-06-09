@@ -1,4 +1,6 @@
 // https://itnext.io/what-do-need-know-about-enumerations-in-typescript-48b554cec43b
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 export class EnumHelper {
   private constructor() {
     // No instances guard

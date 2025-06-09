@@ -17,7 +17,7 @@ export function GraphQLPrismaIndexTemplate(names: string[]) {
     .map(n => `${n}TypeDefs`)
     .toString()
     .replace(/,/g, ',\n  ');
-  indexSource += `\n\nexport const PRISMA_TYPE_DEFS: any[] = [\n  ${bulkTypeDefExportString}\n].filter(x => x)\n\n`;
+  indexSource += `\n\nexport const PRISMA_TYPE_DEFS = [\n  ${bulkTypeDefExportString}\n].filter(x => x)\n\n`;
 
   return indexSource;
 }

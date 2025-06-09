@@ -1,8 +1,5 @@
-/**
- * Author: Peter Hoang
- * Company: Zen Software
- * License: MIT - Open source
- */
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
+
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
 import {
   ApolloClientOptions,

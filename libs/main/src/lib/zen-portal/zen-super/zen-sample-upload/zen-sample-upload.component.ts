@@ -39,6 +39,7 @@ export class ZenSampleUploadComponent {
 
   private reset() {
     this.fileName = '';
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     this.fileInput.nativeElement.value = null as any;
   }
 
