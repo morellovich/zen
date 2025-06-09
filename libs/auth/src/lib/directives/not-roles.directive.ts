@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 
 @Directive({
+  /* eslint-disable  @angular-eslint/directive-selector */
   selector: '[notRoles]',
   standalone: true,
 })

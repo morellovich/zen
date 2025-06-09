@@ -23,9 +23,7 @@ export class EnumHelper {
   }
 
   public static values(enumType: any) {
-    return EnumHelper.keys(enumType).map(key => {
-      return enumType[key];
-    });
+    return EnumHelper.keys(enumType).map(key => enumType[key]);
   }
 
   public static keyValues(enumType: any) {

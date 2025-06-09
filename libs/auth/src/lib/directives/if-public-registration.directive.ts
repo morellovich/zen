@@ -9,6 +9,7 @@ import {
 import { Environment } from '@zen/common';
 
 @Directive({
+  /* eslint-disable  @angular-eslint/directive-selector */
   selector: '[ifPublicRegistration]',
   standalone: true,
 })
