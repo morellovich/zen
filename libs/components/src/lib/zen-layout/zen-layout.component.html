@@ -1,5 +1,5 @@
 <mat-sidenav-container style="height: 100vh">
-  <mat-sidenav #drawer fixedInViewport
+  <mat-sidenav #drawerRef fixedInViewport
     [style.width]="isMobile ? null : '15em'"
     [attr.role]="isMobile ? 'dialog' : 'navigation'"
     [mode]="isMobile ? 'over' : 'side'"
@@ -14,16 +14,11 @@
   
   <mat-sidenav-content style="height: 100vh">
     <mat-toolbar class="bg-primary">
-      @if(!this.drawer?.opened || this.drawer?.mode === 'over') {
-        <button
-        class="me-3"
-        type="button"
-        mat-icon-button
-        (click)="drawer.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
+      @if(!drawerRef.opened || drawerRef.mode === 'over') {
+        <button (click)="drawerRef.toggle()" class="me-3" type="button" mat-icon-button>
+          <mat-icon>menu</mat-icon>
+        </button>
       }
-      
       <div class="d-inline-block me-auto">
         <ng-content select="[slot=toolbar-start]"></ng-content>
       </div>

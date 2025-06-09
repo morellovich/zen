@@ -1,6 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe } from '@angular/common';
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -15,18 +14,17 @@ import { tap } from 'rxjs/operators';
   standalone: true,
   imports: [MatButtonModule, MatIconModule, MatSidenavModule, MatToolbarModule],
 })
-export class ZenLayoutComponent implements OnDestroy {
-  @ViewChild('drawer') drawer?: MatSidenav;
+export class ZenLayoutComponent implements OnInit, OnDestroy {
+  @ViewChild('drawerRef') drawer!: MatSidenav;
   isMobile = false;
   #subs: Subscription[] = [];
-
+  private router = inject(Router);
   private breakpointObserver = inject(BreakpointObserver);
-  router = inject(Router);
 
-  constructor() {
+  ngOnInit() {
     const routerSub = this.router.events.subscribe((event: Event) => {
       if (this.isMobile && event instanceof NavigationStart) {
-        this.drawer!.close();
+        this.drawer.close();
       }
     });
     this.#subs.push(routerSub);
