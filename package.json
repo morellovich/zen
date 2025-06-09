@@ -160,7 +160,7 @@
     }
   },
   "importSort": {
-    ".js, .jsx, .ts, .tsx": {
+    ".js, .ts, .jsx, .tsx, .mjs, .mts, .cjs, .cts": {
       "style": "module",
       "parser": "typescript"
     }
