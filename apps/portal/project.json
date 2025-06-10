@@ -6,6 +6,17 @@
   "sourceRoot": "apps/portal/src",
   "tags": [],
   "targets": {
+    "electron": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "tsConfig": "apps/portal/tsconfig.electron.json",
+      "options": {
+        "outputPath": "dist/apps/portal",
+        "main": "apps/portal/electron/main.ts",
+        "tsConfig": "apps/portal/tsconfig.electron.json",
+        "clean": false
+      }
+    },
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],

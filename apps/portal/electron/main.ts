@@ -1,10 +1,11 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const URL = require('url').URL;
+import path from 'node:path';
+import { URL, pathToFileURL } from 'node:url';
 
-let INDEX_PATH;
+import { BrowserWindow, app } from 'electron';
+
+let INDEX_PATH: string;
 if (app.isPackaged) INDEX_PATH = 'index.html';
-else INDEX_PATH = path.join(__dirname, `../../../dist/apps/portal/browser/index.html`);
+else INDEX_PATH = path.join(__dirname, `../browser/index.html`);
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -23,14 +24,12 @@ function createWindow() {
 
   win.webContents.session.webRequest.onBeforeRequest(filter, (details, callback) => {
     const requestURL = new URL(details.url);
-    // Google OIDC will redirect back to '#/login-confirmed'
+    // The api will redirect back to '#/login-confirmed' upon Google OIDC login
     if (requestURL.hash.startsWith('#/login-confirmed')) {
-      const loginConfirmedURL = new URL(INDEX_PATH);
-      loginConfirmedURL.protocol = 'file:';
-      loginConfirmedURL.hash = requestURL.hash;
+      const loginConfirmedURL = pathToFileURL(INDEX_PATH + requestURL.hash);
       win.loadURL(loginConfirmedURL.toString());
     } else {
-      callback(details);
+      callback({ cancel: false });
     }
   });
 
