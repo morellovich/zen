@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthSession } from '@zen/graphql';
 
@@ -12,10 +12,8 @@ import { ZenRegisterComponent } from '../zen-register/zen-register.component';
   imports: [ZenRegisterComponent],
 })
 export class ZenRegisterPageComponent {
-  constructor(
-    private router: Router,
-    private auth: AuthService
-  ) {}
+  private router = inject(Router);
+  private auth = inject(AuthService);
 
   registered(authSession: AuthSession) {
     this.auth.setSession(authSession);

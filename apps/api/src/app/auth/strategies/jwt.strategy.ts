@@ -11,10 +11,10 @@ import { ConfigService } from '../../config';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly config: ConfigService) {
     super({
-      /** @see [passport-jwt docs](http://www.passportjs.org/packages/passport-jwt/) */
+      /** @see http://www.passportjs.org/packages/passport-jwt/ */
       secretOrKey: config.jwtOptions.publicKey
         ? config.jwtOptions.publicKey
-        : config.jwtOptions.secret,
+        : (config.jwtOptions.secret as string | Buffer),
 
       jwtFromRequest: (req: Request & { token?: string }) => {
         // Websocket connection

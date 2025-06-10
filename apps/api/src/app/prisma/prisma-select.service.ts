@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 import { Injectable } from '@nestjs/common';
 import { PrismaSelect } from '@paljs/plugins';
 import { GraphQLResolveInfo } from 'graphql';

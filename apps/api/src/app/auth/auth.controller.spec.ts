@@ -37,6 +37,7 @@ describe('Auth Controller', () => {
   });
 
   it('constructs a valid query string from an AuthSession', () => {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     controller.getLoginConfirmedURL(undefined as any).then(url => {
       expect(url).toEqual(
         'http://site.com/login-confirmed?token=abc.def_%252B%252Fghi.jkl%253D%253D'

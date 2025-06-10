@@ -6,22 +6,17 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/api",
-        "main": "apps/api/src/main.ts",
-        "tsConfig": "apps/api/tsconfig.app.json",
-        "assets": ["apps/api/src/assets"],
-        "webpackConfig": "apps/api/webpack.config.js"
+        "command": "webpack-cli build",
+        "args": ["node-env=production"],
+        "assets": ["apps/api/src/assets"]
       },
       "configurations": {
+        "development": {
+          "args": ["node-env=development"]
+        },
         "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false,
           "fileReplacements": [
             {
               "replace": "apps/api/src/environments/environment.ts",
@@ -32,6 +27,7 @@
       }
     },
     "serve": {
+      "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
