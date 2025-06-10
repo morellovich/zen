@@ -25,7 +25,6 @@ const execAsync = promisify(exec);
 export type ZenGeneratorConfig = {
   palConfig: PalConfig;
   prismaClientPath: string;
-  /** [GitHub Issue: createManyAndReturn types not what Pal.js is expecting](https://github.com/paljs/prisma-tools/issues/335#issuecomment-2155972868) */
   apiOutPath: string;
   auth?: {
     /**
