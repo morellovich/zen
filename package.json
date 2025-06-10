@@ -5,9 +5,9 @@
   "private": true,
   "main": "apps/portal/src/electron.js",
   "scripts": {
-    "start": "nx serve portal",
     "install:electron": "node node_modules/electron/install.js",
     "start:electron": "pnpm nx build portal --outputHashing=all --base-href=./ && electron .",
+    "start": "nx serve portal",
     "start:api": "nx serve api",
     "e2e:portal": "nx e2e portal-e2e --ui",
     "e2e:api": "nx e2e api-e2e",
