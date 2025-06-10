@@ -26,7 +26,8 @@ function createWindow() {
     const requestURL = new URL(details.url);
     // The api will redirect back to '#/login-confirmed' upon Google OIDC login
     if (requestURL.hash.startsWith('#/login-confirmed')) {
-      const loginConfirmedURL = pathToFileURL(INDEX_PATH + requestURL.hash);
+      const loginConfirmedURL = pathToFileURL(INDEX_PATH);
+      loginConfirmedURL.hash = requestURL.hash;
       win.loadURL(loginConfirmedURL.toString());
     } else {
       callback({ cancel: false });
