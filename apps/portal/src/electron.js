@@ -23,7 +23,7 @@ function createWindow() {
 
   win.webContents.session.webRequest.onBeforeRequest(filter, (details, callback) => {
     const requestURL = new URL(details.url);
-
+    // Google OIDC will redirect back to '#/login-confirmed'
     if (requestURL.hash.startsWith('#/login-confirmed')) {
       const loginConfirmedURL = new URL(INDEX_PATH);
       loginConfirmedURL.protocol = 'file:';
