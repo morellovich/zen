@@ -18,8 +18,6 @@ function createWindow() {
   });
 
   if (!app.isPackaged) win.webContents.openDevTools();
-  win.loadFile(INDEX_PATH);
-  win.once('ready-to-show', win.show);
 
   const filter = { urls: ['*://localhost/*'] };
 
@@ -35,6 +33,9 @@ function createWindow() {
       callback(details);
     }
   });
+
+  win.loadFile(INDEX_PATH);
+  win.once('ready-to-show', win.show);
 }
 
 app.whenReady().then(() => {
