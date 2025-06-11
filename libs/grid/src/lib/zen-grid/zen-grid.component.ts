@@ -10,6 +10,7 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -117,7 +118,6 @@ const DEFAULT_TAKE = 10;
     ReactiveFormsModule,
     SafeHtmlPipe,
     ZenConfirmModalModule,
-    ZenGridDetailTemplateDirective,
     ZenSnackbarModule,
   ],
   providers: [KendoToPrismaService],
@@ -208,17 +208,15 @@ export class ZenGridComponent<T extends object> implements AfterContentInit, OnD
   #countSub?: Subscription;
   #data?: T[];
 
-  constructor(
-    private apollo: Apollo.Apollo,
-    private changeDetectorRef: ChangeDetectorRef,
-    private exporter: ExporterService,
-    private kendoGridSettingsService: KendoGridSettingsService,
-    private kendoToPrisma: KendoToPrismaService,
-    private snackBar: MatSnackBar,
-    private snackBarError: ZenSnackbarError,
-    private styles: StyleService,
-    private zenConfirmModal: ZenConfirmModal
-  ) {}
+  private apollo = inject(Apollo.Apollo);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private exporter = inject(ExporterService);
+  private kendoGridSettingsService = inject(KendoGridSettingsService);
+  private kendoToPrisma = inject(KendoToPrismaService);
+  private snackBar = inject(MatSnackBar);
+  private snackBarError = inject(ZenSnackbarError);
+  private styles = inject(StyleService);
+  private zenConfirmModal = inject(ZenConfirmModal);
 
   ngAfterContentInit() {
     if (!this.settings) {
@@ -460,7 +458,7 @@ export class ZenGridComponent<T extends object> implements AfterContentInit, OnD
   }
 
   get showDetailsIf() {
-    return this.details?.zenGridDetailTemplateShowIf ?? (() => true);
+    return this.details?.showIf ?? (() => true);
   }
 
   showEditIf(dataItem: T) {

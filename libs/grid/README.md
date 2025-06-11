@@ -131,8 +131,9 @@ The master details template row item can be accessed via `zenGridDetailTemplate`
 
 ```html
 <zen-grid [settings]="settings">
-  <ng-template zenGridDetailTemplate let-dataItem [zenGridDetailTemplateShowIf]="showDetails">
-    id: {{dataItem.id}}
+  <ng-template zenGridDetailTemplate let-dataItem let-rowIndex="rowIndex"
+    [zenGridDetailTemplateShowIf]="myCondition">
+      ID: {{dataItem.id}}
   </ng-template>
 </zen-grid>
 ```
