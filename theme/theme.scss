@@ -21,7 +21,9 @@ body {
 
 // zen-snackbar-error background
 .snackbar-error {
-  --mdc-snackbar-container-color: #{$danger};
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #383838;
+  --mat-snack-bar-container-color: #{$danger};
 }
 
 // Horizontal scrollbar fix for Bootstrap grids overflowing within Angular Material sidenav
