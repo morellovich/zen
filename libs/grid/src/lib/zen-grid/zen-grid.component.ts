@@ -458,7 +458,7 @@ export class ZenGridComponent<T extends object> implements AfterContentInit, OnD
   }
 
   get showDetailsIf() {
-    return this.details?.showIf ?? (() => true);
+    return this.details?.zenGridDetailTemplateShowIf ?? (() => true);
   }
 
   showEditIf(dataItem: T) {
