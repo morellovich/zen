@@ -1,13 +1,15 @@
+import { FieldDataType } from '@progress/kendo-angular-grid';
+
 import { NestedKeyOf } from './nested-keyof';
 
 export interface KendoGridColumnSettings<T extends object> {
   field: NestedKeyOf<T>;
   title?: string;
   /** @see [Kendo Grid - Filter Data Types](https://www.telerik.com/kendo-angular-ui/components/grid/filtering/basics/#toc-filter-data-types) */
-  filter?: 'text' | 'numeric' | 'boolean' | 'date';
+  filter?: FieldDataType;
   /**
    * Set to true if the field is nullable.  Sorting will not work if not set correctly.
-   **/
+   */
   nullable?: boolean;
   format?: string;
   width?: number;
