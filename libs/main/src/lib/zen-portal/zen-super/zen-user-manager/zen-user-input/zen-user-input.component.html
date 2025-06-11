@@ -27,20 +27,19 @@
 
 <mat-dialog-actions class="d-flex justify-content-between">
   @if(data.action === 'edit') {
-    <button type="submit" form="user-form"
-    mat-raised-button color="primary"
+    <button type="submit" form="user-form" matButton="filled"
     [disabled]="loading || form.invalid">
       <i class="fa-solid fa-fw fa-save"></i>
       Save
     </button>
   }
 
-  <!-- <button mat-raised-button (click)="form.markAllAsTouched()" [disabled]="loading">
+  <!-- <button matButton="elevated" (click)="form.markAllAsTouched()" [disabled]="loading">
     <i class="fa-solid fa-fw fa-clipboard-list"></i>
     Validate
   </button> -->
 
-  <button mat-raised-button mat-dialog-close [disabled]="loading">
+  <button matButton="elevated" mat-dialog-close [disabled]="loading">
     <i class="fa-solid fa-fw fa-ban"></i>
     Cancel
   </button>
