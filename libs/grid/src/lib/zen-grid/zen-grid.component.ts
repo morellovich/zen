@@ -17,7 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import {
   AddEvent,
   ColumnMenuSettings,
@@ -42,7 +42,6 @@ import {
   SafeHtmlPipe,
   ZenConfirmModal,
   ZenConfirmModalModule,
-  ZenLoadingComponent,
   ZenSnackbarError,
   ZenSnackbarModule,
 } from '@zen/components';
@@ -93,7 +92,7 @@ export interface ZenGridSettings<T extends object> {
    * const showDelete = row => ability.can('delete', row);
    * ```
    */
-  ability?: Ability;
+  ability?: PureAbility;
 }
 
 const DEFAULT_TAKE = 10;
@@ -119,7 +118,6 @@ const DEFAULT_TAKE = 10;
     SafeHtmlPipe,
     ZenConfirmModalModule,
     ZenGridDetailTemplateDirective,
-    ZenLoadingComponent,
     ZenSnackbarModule,
   ],
   providers: [KendoToPrismaService],

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 
@@ -25,8 +25,7 @@ type ExtendedConfig = {
 @Injectable()
 export class ZenSnackbarError implements OnDestroy {
   #subs: Subscription[] = [];
-
-  constructor(private snackBar: MatSnackBar) {}
+  private snackBar = inject(MatSnackBar);
 
   open(error: unknown, config?: MatSnackBarConfig & ExtendedConfig) {
     const mergedConfig: MatSnackBarConfig & ExtendedConfig = {

@@ -7,6 +7,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import {
   FormControl,
@@ -70,8 +71,9 @@ export class ZenPasswordResetRequestFormComponent implements AfterContentInit, O
       nonNullable: true,
     }),
   });
+  private authPasswordResetRequestQueryGQL = inject(AuthPasswordResetRequestQueryGQL);
 
-  constructor(private authPasswordResetRequestQueryGQL: AuthPasswordResetRequestQueryGQL) {
+  constructor() {
     const sub = this.emailOrUsername.valueChanges.subscribe(() => {
       this.#notFound = false;
     });

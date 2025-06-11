@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { DeleteOneUserGQL, FindManyUserCountGQL, FindManyUserGQL, UserFields } from '@zen/graphql';
 import { GridMode, KendoGridSettings, ZenGridComponent, ZenGridSettings } from '@zen/grid';
 
@@ -57,20 +57,20 @@ export class ZenUserGridComponent {
   @Input() selection: Array<UserFields['id']> = [];
   settings: ZenGridSettings<UserFields>;
 
-  constructor(
-    findManyUserGQL: FindManyUserGQL,
-    findManyUserCountGQL: FindManyUserCountGQL,
-    deleteOneUserGQL: DeleteOneUserGQL,
-    ability: Ability,
-    private dialog: MatDialog
-  ) {
+  findManyUserGQL = inject(FindManyUserGQL);
+  findManyUserCountGQL = inject(FindManyUserCountGQL);
+  deleteOneUserGQL = inject(DeleteOneUserGQL);
+  ability = inject(PureAbility);
+  private dialog = inject(MatDialog);
+
+  constructor() {
     this.settings = {
       typename: 'User',
-      findManyGQL: findManyUserGQL,
-      findManyCountGQL: findManyUserCountGQL,
-      deleteOneGQL: deleteOneUserGQL,
+      findManyGQL: this.findManyUserGQL,
+      findManyCountGQL: this.findManyUserCountGQL,
+      deleteOneGQL: this.deleteOneUserGQL,
       defaultSettings: DEFAULT_SETTINGS,
-      ability: ability,
+      ability: this.ability,
     };
   }
 

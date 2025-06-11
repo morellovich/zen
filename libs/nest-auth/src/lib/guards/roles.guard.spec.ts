@@ -14,6 +14,7 @@ describe('rbac-logic', () => {
   });
 
   it('should throw if called with new', () => {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     expect(() => new (<any>RolesGuard)()).toThrow(
       'RolesGuard cannot be instantiated directly. Use RolesGuard() instead.'
     );
