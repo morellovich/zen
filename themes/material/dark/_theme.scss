@@ -1,4 +1,4 @@
-@use '../../font';
+@use '../../default-font';
 @use './theme-colors';
 @use '@angular/material' as mat;
 
@@ -12,11 +12,20 @@ $dark-theme: mat.define-theme(
       tertiary: theme-colors.$tertiary-palette,
     ),
     typography: (
-      brand-family: font.$zen-brand,
-      plain-family: font.$zen-plain,
+      brand-family: default-font.$zen-brand,
+      plain-family: default-font.$zen-plain,
     ),
   )
 );
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: default-font.$zen-brand;
+}
 
 html {
   @include mat.all-component-themes($dark-theme);
