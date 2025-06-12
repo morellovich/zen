@@ -5,12 +5,14 @@ import {
   OnDestroy,
   TemplateRef,
   ViewContainerRef,
+  inject,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { AuthService } from '../auth.service';
 
 @Directive({
+  // eslint-disable-next-line  @angular-eslint/directive-selector
   selector: '[ifLoggedIn]',
   standalone: true,
 })
@@ -18,13 +20,12 @@ export class IfLoggedInDirective implements OnDestroy {
   #embededViewRef: EmbeddedViewRef<unknown> | undefined;
   #ifLoggedIn?: boolean;
   #sub: Subscription;
+  #templateRef = inject(TemplateRef<unknown>);
+  #viewContainer = inject(ViewContainerRef);
+  #auth = inject(AuthService);
 
-  constructor(
-    private templateRef: TemplateRef<unknown>,
-    private viewContainer: ViewContainerRef,
-    private auth: AuthService
-  ) {
-    this.#sub = auth.loggedIn$.subscribe(() => this.update());
+  constructor() {
+    this.#sub = this.#auth.loggedIn$.subscribe(() => this.update());
   }
 
   @Input()
@@ -38,7 +39,7 @@ export class IfLoggedInDirective implements OnDestroy {
   }
 
   update() {
-    if ((this.ifLoggedIn && this.auth.loggedIn) || (!this.ifLoggedIn && !this.auth.loggedIn)) {
+    if ((this.ifLoggedIn && this.#auth.loggedIn) || (!this.ifLoggedIn && !this.#auth.loggedIn)) {
       this.render();
     } else {
       this.clear();
@@ -47,11 +48,11 @@ export class IfLoggedInDirective implements OnDestroy {
 
   render() {
     if (!this.#embededViewRef)
-      this.#embededViewRef = this.viewContainer.createEmbeddedView(this.templateRef);
+      this.#embededViewRef = this.#viewContainer.createEmbeddedView(this.#templateRef);
   }
 
   clear() {
-    this.viewContainer.clear();
+    this.#viewContainer.clear();
     this.#embededViewRef = undefined;
   }
 

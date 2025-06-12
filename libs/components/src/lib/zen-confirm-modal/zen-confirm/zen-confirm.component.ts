@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, Inject, Input, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, ViewChild, inject } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -16,13 +16,13 @@ export class ZenConfirmComponent implements AfterContentInit {
   @Input() confirmText = 'Yes';
   @Input() cancelText = 'No';
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ZenConfirmOptions | undefined,
-    public dialogRef: MatDialogRef<ZenConfirmComponent>
-  ) {
-    if (data?.title) this.title = data.title;
-    if (data?.confirmText) this.confirmText = data.confirmText;
-    if (data?.cancelText) this.cancelText = data.cancelText;
+  data: ZenConfirmOptions | undefined = inject(MAT_DIALOG_DATA);
+  dialogRef = inject(MatDialogRef<ZenConfirmComponent>);
+
+  constructor() {
+    if (this.data?.title) this.title = this.data.title;
+    if (this.data?.confirmText) this.confirmText = this.data.confirmText;
+    if (this.data?.cancelText) this.cancelText = this.data.cancelText;
   }
 
   ngAfterContentInit() {

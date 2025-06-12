@@ -4,7 +4,7 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 import { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { UploadOptions } from 'graphql-upload/graphqlUploadExpress.js';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import { HelmetOptions } from 'helmet';
 import { StrategyOptions as GoogleStrategyOptions } from 'passport-google-oauth20';
 
@@ -19,7 +19,7 @@ export abstract class EnvironmentBase {
     readonly sandbox?: boolean;
     readonly introspection?: boolean;
     readonly csrfPrevention?: boolean;
-    readonly uploads?: UploadOptions;
+    readonly uploads?: Parameters<typeof graphqlUploadExpress>[0];
   };
   readonly publicRegistration: boolean;
   readonly jwtOptions: JwtModuleOptions;
