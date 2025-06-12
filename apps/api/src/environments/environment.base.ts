@@ -2,7 +2,7 @@ import { MailerOptions } from '@nestjs-modules/mailer';
 import { NestApplicationOptions } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { ThrottlerModuleOptions } from '@nestjs/throttler';
-import { UploadOptions } from 'graphql-upload/graphqlUploadExpress.js';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import { HelmetOptions } from 'helmet';
 import { StrategyOptions as GoogleStrategyOptions } from 'passport-google-oauth20';
 
@@ -20,7 +20,7 @@ export abstract class EnvironmentBase {
     readonly sandbox?: boolean;
     readonly introspection?: boolean;
     readonly csrfPrevention?: boolean;
-    readonly uploads?: UploadOptions;
+    readonly uploads?: Parameters<typeof graphqlUploadExpress>[0];
   };
   readonly publicRegistration: boolean;
   readonly jwtOptions: JwtModuleOptions;

@@ -1,0 +1,14 @@
+@use './default-font';
+@use './material/light/theme';
+@import './bootstrap/light-variables';
+@import './bootstrap/bootstrap';
+
+body {
+  min-height: 100vh;
+  font-family: default-font.$zen-plain;
+}
+
+/** Horizontal scrollbar fix for Bootstrap grids overflowing within Angular Material sidenav */
+.row {
+  --bs-gutter-x: 0;
+}

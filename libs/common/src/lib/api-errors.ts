@@ -4,7 +4,7 @@ export enum Codes {
 }
 
 export enum AuthLogin {
-  INCORRECT_PASSWORD = 'Incorrect Password',
+  INCORRECT_PASSWORD = 'Incorrect password',
 }
 
 export enum AuthPasswordResetConfirmation {

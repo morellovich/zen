@@ -3,13 +3,14 @@ export abstract class Environment {
   abstract readonly publicRegistration: boolean;
   abstract readonly auth: {
     /**
-     * `app-load` will exchange the auth token every time the app loads
-     * `efficient` will exchange the auth token only when intervals are exceeded
+     * `app-load` will exchange the auth token for a fresh token every time the app loads.
+     *
+     * `efficient` will exchange the auth token only when intervals are exceeded.
      */
     readonly exchangeStrategy: 'app-load' | 'efficient';
 
     /**
-     * The rate in milliseconds at which the client will exchange the JWT.
+     * The rate in milliseconds at which the client will exchange the JWT when the user's session has `rememberMe = false`.
      * This should be less than the JWT expiration time.
      * @see `apps/api/src/environments/environment.ts` for `Environment.jwtOptions.signOptions.expiresIn`
      * @example 30 * 60 * 1000 is 30 minutes
@@ -33,7 +34,7 @@ export abstract class Environment {
 
   /**
    * Whether or not to enable Google OAuth for the client application.
-   * Will hide the `Sign in with Google` button if false.
+   * This Will hide the sign in and sign up with Google buttons if set to false.
    */
   abstract readonly enableGoogleOAuth: boolean;
 
@@ -86,6 +87,6 @@ export class EnvironmentProd implements Environment {
     portal: 'https://portal.site.com/#',
     graphql: 'https://api.site.com/graphql',
     graphqlSubscriptions: 'wss://api.site.com/graphql',
-    socketio: 'https://api.site.com:81',
+    socketio: 'https://api.site.com/7081',
   } as const;
 }
