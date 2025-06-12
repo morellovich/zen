@@ -34,6 +34,7 @@ export class AuthController {
     const authSession = await this.auth.getAuthSession(user, false);
     const token = encodeURIComponent(authSession.token);
     const queryParams = new URLSearchParams({ token });
+    // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
     return this.config.oauth!.loginConfirmedURL + '?' + queryParams;
   }
 }

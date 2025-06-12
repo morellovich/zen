@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { Environment } from '@zen/common';
@@ -15,10 +15,8 @@ import { ZenLoginFormComponent } from '../zen-login-form/zen-login-form.componen
   imports: [IfPublicRegistrationDirective, MatButtonModule, RouterLink, ZenLoginFormComponent],
 })
 export class ZenLoginPageComponent {
-  constructor(
-    private router: Router,
-    private env: Environment
-  ) {}
+  private router = inject(Router);
+  private env = inject(Environment);
 
   onLoggedIn() {
     this.router.navigateByUrl(this.env.url.loginRedirect);

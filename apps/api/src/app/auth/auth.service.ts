@@ -24,6 +24,7 @@ export class AuthService {
       roles: user.roles,
     };
 
+    /* eslint-disable  @typescript-eslint/no-non-null-assertion */
     const expiresIn = rememberMe
       ? this.config.expiresInRememberMe
       : (this.config.jwtOptions.signOptions!.expiresIn as number);

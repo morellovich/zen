@@ -8,6 +8,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import {
   FormControl,
@@ -82,13 +83,12 @@ export class ZenPasswordResetConfirmationFormComponent implements AfterContentIn
       nonNullable: true,
     }),
   });
+  router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private auth = inject(AuthService);
+  private authPasswordResetConfirmationGQL = inject(AuthPasswordResetConfirmationGQL);
 
-  constructor(
-    private auth: AuthService,
-    private authPasswordResetConfirmationGQL: AuthPasswordResetConfirmationGQL,
-    private route: ActivatedRoute,
-    public router: Router
-  ) {
+  constructor() {
     const sub = this.route.queryParamMap
       .pipe(map(params => params.get('token')))
       .subscribe(token => (this.token = token));

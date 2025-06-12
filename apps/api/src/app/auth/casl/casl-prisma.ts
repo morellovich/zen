@@ -2,6 +2,8 @@
  * Custom PrismaClient output path requires a custom casl-prisma.ts file
  * Code copied from https://casl.js.org/v6/en/package/casl-prisma
  */
+
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import { hkt } from '@casl/ability';
 import {
   ExtractModelName,

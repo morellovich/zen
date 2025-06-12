@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 import { ApolloServerPlugin } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
@@ -7,7 +9,7 @@ import { ApolloDriverConfig } from '@nestjs/apollo';
 import { Injectable } from '@nestjs/common';
 import { GqlOptionsFactory } from '@nestjs/graphql';
 import { print } from 'graphql';
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 
 import { ConfigService } from '../config';
 import { IContext } from './models';
