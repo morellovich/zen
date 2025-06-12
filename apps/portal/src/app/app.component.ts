@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { AuthService, IfLoggedInDirective, RolesDirective, ZenLoginLinkComponent } from '@zen/auth';
@@ -18,5 +18,5 @@ import { ZenLayoutComponent } from '@zen/components';
   ],
 })
 export class AppComponent {
-  constructor(public auth: AuthService) {}
+  auth = inject(AuthService);
 }

@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { ElementRef, ViewChild } from '@angular/core';
+import { ElementRef, ViewChild, inject } from '@angular/core';
 import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -7,7 +7,8 @@ import { ZenLoadingComponent, ZenSnackbarError, ZenSnackbarModule } from '@zen/c
 import { SampleUploadGQL } from '@zen/graphql';
 import gql from 'graphql-tag';
 
-const SampleUploadDoc = gql`
+// eslint-disable-next-line  @typescript-eslint/no-unused-expressions
+gql`
   mutation SampleUpload($file: Upload!) {
     sampleUpload(file: $file)
   }
@@ -24,12 +25,9 @@ export class ZenSampleUploadComponent {
   @ViewChild('fileInput', { static: true }) fileInput!: ElementRef<HTMLInputElement>;
   fileName = '';
   isUploading = false;
-
-  constructor(
-    private snackbar: MatSnackBar,
-    private snackbarError: ZenSnackbarError,
-    private sampleUploadGQL: SampleUploadGQL
-  ) {}
+  private snackbar = inject(MatSnackBar);
+  private snackbarError = inject(ZenSnackbarError);
+  private sampleUploadGQL = inject(SampleUploadGQL);
 
   get file() {
     return this.fileInput.nativeElement.files?.[0];
@@ -41,6 +39,7 @@ export class ZenSampleUploadComponent {
 
   private reset() {
     this.fileName = '';
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     this.fileInput.nativeElement.value = null as any;
   }
 

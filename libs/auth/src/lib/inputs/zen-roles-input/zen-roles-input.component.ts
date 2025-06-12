@@ -1,5 +1,5 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, inject } from '@angular/core';
 import {
   ControlValueAccessor,
   FormControl,
@@ -43,10 +43,9 @@ export class ZenRolesInputComponent implements ControlValueAccessor, OnDestroy {
   readonly control = new FormControl<string[]>([], { nonNullable: true });
   readonly #subs: Subscription[] = [];
   touchedListeners: Array<() => unknown> = [];
+  private zenSnackbarError = inject(ZenSnackbarError);
 
   @Input() label = 'Roles';
-
-  constructor(private zenSnackbarError: ZenSnackbarError) {}
 
   get filteredRoles() {
     return this.ROLES.filter(r => !this.control.value.includes(r));
@@ -81,16 +80,17 @@ export class ZenRolesInputComponent implements ControlValueAccessor, OnDestroy {
     else this.control.reset();
   }
 
-  registerOnChange(fn: (_: any) => void) {
+  registerOnChange(fn: (_: string[]) => unknown) {
     const sub = this.control.valueChanges.subscribe(fn);
     this.#subs.push(sub);
+    fn(this.control.value);
   }
 
   emitTouched() {
     this.touchedListeners.forEach(fn => fn());
   }
 
-  registerOnTouched(fn: any) {
+  registerOnTouched(fn: () => unknown) {
     this.touchedListeners.push(fn);
   }
 
