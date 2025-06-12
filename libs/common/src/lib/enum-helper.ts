@@ -1,4 +1,6 @@
 // https://itnext.io/what-do-need-know-about-enumerations-in-typescript-48b554cec43b
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 export class EnumHelper {
   private constructor() {
     // No instances guard
@@ -23,9 +25,7 @@ export class EnumHelper {
   }
 
   public static values(enumType: any) {
-    return EnumHelper.keys(enumType).map(key => {
-      return enumType[key];
-    });
+    return EnumHelper.keys(enumType).map(key => enumType[key]);
   }
 
   public static keyValues(enumType: any) {

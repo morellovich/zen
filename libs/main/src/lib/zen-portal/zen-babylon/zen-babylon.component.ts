@@ -11,7 +11,15 @@ import '@babylonjs/core/Physics/physicsEngineComponent';
 import '@babylonjs/core/Helpers/sceneHelpers';
 import '@babylonjs/core/Engines/Extensions/engine.uniformBuffer';
 
-import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  NgZone,
+  OnDestroy,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { KeyboardEventTypes, Mesh, WebGPUEngine } from '@babylonjs/core';
 import { FollowCamera } from '@babylonjs/core/Cameras/followCamera';
 import { Engine } from '@babylonjs/core/Engines/engine';
@@ -48,8 +56,7 @@ export class ZenBabylonComponent implements AfterViewInit, OnDestroy {
   room!: Room<MyRoomState>;
   loading = true;
   physicsHelper!: PhysicsHelper;
-
-  constructor(private ngZone: NgZone) {}
+  private ngZone = inject(NgZone);
 
   ngAfterViewInit() {
     // Update canvas dimensions on resize

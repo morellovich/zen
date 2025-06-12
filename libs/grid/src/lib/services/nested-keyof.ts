@@ -7,6 +7,6 @@ export type NestedKeyOf<T extends object> = {
   [Key in keyof T & (string | number)]: NonNullable<T[Key]> extends Array<any>
     ? `${Key}`
     : NonNullable<T[Key]> extends object
-    ? `${Key}` | `${Key}.${NestedKeyOf<NonNullable<T[Key]>>}`
-    : `${Key}`;
+      ? `${Key}` | `${Key}.${NestedKeyOf<NonNullable<T[Key]>>}`
+      : `${Key}`;
 }[keyof Omit<T, '__typename'> & (string | number)];

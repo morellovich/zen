@@ -13,5 +13,6 @@ import { RequestUser } from './models/request-user';
  */
 @Injectable()
 export abstract class CaslFactory {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   abstract createAbility(user: RequestUser): Promise<any>;
 }

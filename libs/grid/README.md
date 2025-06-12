@@ -34,7 +34,7 @@ The grid provides end-to-end type safety for its configuration, from the Prisma 
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { DeleteOneUserGQL, FindManyUserCountGQL, FindManyUserGQL, UserFields } from '@zen/graphql';
 import { GridMode, KendoGridSettings, ZenGridComponent, ZenGridSettings } from '@zen/grid';
 
@@ -95,7 +95,7 @@ export class ZenUserGridComponent {
     findManyUserGQL: FindManyUserGQL,
     findManyUserCountGQL: FindManyUserCountGQL,
     deleteOneUserGQL: DeleteOneUserGQL,
-    ability: Ability,
+    ability: PureAbility,
     private dialog: MatDialog
   ) {
     this.settings = {
@@ -131,8 +131,9 @@ The master details template row item can be accessed via `zenGridDetailTemplate`
 
 ```html
 <zen-grid [settings]="settings">
-  <ng-template zenGridDetailTemplate let-dataItem [zenGridDetailTemplateShowIf]="showDetails">
-    id: {{dataItem.id}}
+  <ng-template zenGridDetailTemplate let-dataItem let-rowIndex="rowIndex"
+    [zenGridDetailTemplateShowIf]="myCondition">
+      ID: {{dataItem.id}}
   </ng-template>
 </zen-grid>
 ```

@@ -10,6 +10,7 @@ import {
   Output,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -17,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import {
   AddEvent,
   ColumnMenuSettings,
@@ -42,7 +43,6 @@ import {
   SafeHtmlPipe,
   ZenConfirmModal,
   ZenConfirmModalModule,
-  ZenLoadingComponent,
   ZenSnackbarError,
   ZenSnackbarModule,
 } from '@zen/components';
@@ -93,7 +93,7 @@ export interface ZenGridSettings<T extends object> {
    * const showDelete = row => ability.can('delete', row);
    * ```
    */
-  ability?: Ability;
+  ability?: PureAbility;
 }
 
 const DEFAULT_TAKE = 10;
@@ -118,8 +118,6 @@ const DEFAULT_TAKE = 10;
     ReactiveFormsModule,
     SafeHtmlPipe,
     ZenConfirmModalModule,
-    ZenGridDetailTemplateDirective,
-    ZenLoadingComponent,
     ZenSnackbarModule,
   ],
   providers: [KendoToPrismaService],
@@ -210,17 +208,15 @@ export class ZenGridComponent<T extends object> implements AfterContentInit, OnD
   #countSub?: Subscription;
   #data?: T[];
 
-  constructor(
-    private apollo: Apollo.Apollo,
-    private changeDetectorRef: ChangeDetectorRef,
-    private exporter: ExporterService,
-    private kendoGridSettingsService: KendoGridSettingsService,
-    private kendoToPrisma: KendoToPrismaService,
-    private snackBar: MatSnackBar,
-    private snackBarError: ZenSnackbarError,
-    private styles: StyleService,
-    private zenConfirmModal: ZenConfirmModal
-  ) {}
+  private apollo = inject(Apollo.Apollo);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private exporter = inject(ExporterService);
+  private kendoGridSettingsService = inject(KendoGridSettingsService);
+  private kendoToPrisma = inject(KendoToPrismaService);
+  private snackBar = inject(MatSnackBar);
+  private snackBarError = inject(ZenSnackbarError);
+  private styles = inject(StyleService);
+  private zenConfirmModal = inject(ZenConfirmModal);
 
   ngAfterContentInit() {
     if (!this.settings) {

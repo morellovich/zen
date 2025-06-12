@@ -2,10 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "ES2022",
+    "module": "es2022",
     "types": ["node"],
+    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "ES2022",
+    "target": "es2022",
     "lib": ["ES2022"],
     "noImplicitAny": true,
     "strict": true,
@@ -14,6 +15,6 @@
     "noFallthroughCasesInSwitch": true,
     "useDefineForClassFields": false
   },
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }

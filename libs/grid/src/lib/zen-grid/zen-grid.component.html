@@ -179,8 +179,8 @@
     }
 
     @if(details) {
-      <ng-template kendoGridDetailTemplate let-dataItem [kendoGridDetailTemplateShowIf]="showDetailsIf">
-        <ng-container [ngTemplateOutlet]="details.host" [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
+      <ng-template kendoGridDetailTemplate let-dataItem let-rowIndex="rowIndex" [kendoGridDetailTemplateShowIf]="showDetailsIf">
+        <ng-container [ngTemplateOutlet]="details.host" [ngTemplateOutletContext]="{ $implicit: dataItem, rowIndex }"></ng-container>
       </ng-template>
     }
       

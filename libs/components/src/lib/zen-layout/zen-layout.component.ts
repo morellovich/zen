@@ -1,6 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe } from '@angular/common';
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -13,18 +12,17 @@ import { tap } from 'rxjs/operators';
   selector: 'zen-layout',
   templateUrl: './zen-layout.component.html',
   standalone: true,
-  imports: [AsyncPipe, MatButtonModule, MatIconModule, MatSidenavModule, MatToolbarModule],
+  imports: [MatButtonModule, MatIconModule, MatSidenavModule, MatToolbarModule],
 })
-export class ZenLayoutComponent implements OnDestroy {
-  @ViewChild('drawer') drawer!: MatSidenav;
+export class ZenLayoutComponent implements OnInit, OnDestroy {
+  @ViewChild('drawerRef') drawer!: MatSidenav;
   isMobile = false;
   #subs: Subscription[] = [];
+  private router = inject(Router);
+  private breakpointObserver = inject(BreakpointObserver);
 
-  constructor(
-    private breakpointObserver: BreakpointObserver,
-    router: Router
-  ) {
-    const routerSub = router.events.subscribe((event: Event) => {
+  ngOnInit() {
+    const routerSub = this.router.events.subscribe((event: Event) => {
       if (this.isMobile && event instanceof NavigationStart) {
         this.drawer.close();
       }
