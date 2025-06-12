@@ -957,7 +957,7 @@ export type CreateManyUserAndReturnVariables = Exact<{
 }>;
 
 
-export type CreateManyUserAndReturn = { __typename?: 'Mutation', createManyUserAndReturn: Array<{ __typename?: 'User', id: string, username?: string | null, email: string }> };
+export type CreateManyUserAndReturn = { __typename?: 'Mutation', createManyUserAndReturn: Array<{ __typename?: 'User', id: string, username?: string | null, email: string, createdAt: any, roles: Array<string>, rules: Array<any> }> };
 
 export type UpdateOneUserVariables = Exact<{
   data: UserUpdateInput;
