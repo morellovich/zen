@@ -1,0 +1,28 @@
+@use './default-font';
+@use './material/dark/theme';
+@import './bootstrap/dark-variables';
+@import './bootstrap/bootstrap';
+
+body {
+  min-height: 100vh;
+  font-family: default-font.$zen-plain;
+}
+
+/** Horizontal scrollbar fix for Bootstrap grids overflowing within Angular Material sidenav */
+.row {
+  --bs-gutter-x: 0;
+}
+
+:root {
+  /** Angular Material sidenav background colors */
+  --mat-sidenav-container-background-color: #{$gray-900};
+  --mat-sidenav-content-background-color: #{$gray-900};
+
+  /** Angular Material dialog background */
+  --mat-dialog-container-color: #{$gray-900};
+}
+
+/** Bootstrap card header font & zero margins on header elements */
+.card-header {
+  color: #ffffff;
+}
