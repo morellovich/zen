@@ -16,6 +16,6 @@ export class ZenSampleSocketService extends Socket {
     });
 
     // sets the namespace of the socket
-    this.ioSocket.nsp = '/sample';
+    (<any>this.ioSocket).nsp = '/sample';
   }
 }
