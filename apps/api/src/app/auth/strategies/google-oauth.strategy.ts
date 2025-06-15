@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { RequestUser } from '@zen/nest-auth';
@@ -13,7 +14,7 @@ export class GoogleOAuthStrategy extends PassportStrategy(Strategy, 'google') {
     config: ConfigService,
     private readonly prisma: PrismaService
   ) {
-    super(config.oauth!.google);
+    super(config.oauth!.google!);
   }
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {

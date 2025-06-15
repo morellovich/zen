@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -22,11 +22,11 @@ import { ZenLanguagePickerComponent, ZenLayoutComponent } from '@zen/components'
   ],
 })
 export class AppComponent {
-  constructor(
-    public auth: AuthService,
-    translate: TranslateService,
-    env: Environment
-  ) {
-    translate.currentLang = env.defaultLanguage;
+  auth = inject(AuthService);
+  private translate = inject(TranslateService);
+  private env = inject(Environment);
+
+  constructor() {
+    this.translate.currentLang = this.env.defaultLanguage;
   }
 }

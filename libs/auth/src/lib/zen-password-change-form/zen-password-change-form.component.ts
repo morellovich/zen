@@ -18,7 +18,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
 import { ApolloError } from '@apollo/client/errors';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ZenLoadingComponent } from '@zen/components';
@@ -47,7 +46,6 @@ interface FormType {
     MatIconModule,
     MatInputModule,
     ReactiveFormsModule,
-    RouterLink,
     TranslateModule,
     ZenLoadingComponent,
     ZenPasswordInputComponent,
@@ -75,11 +73,9 @@ export class ZenPasswordChangeFormComponent implements OnDestroy {
       nonNullable: true,
     }),
   });
+  private authPasswordChangeGQL = inject(AuthPasswordChangeGQL);
 
-  constructor(
-    private authPasswordChangeGQL: AuthPasswordChangeGQL,
-    public router: Router
-  ) {
+  constructor() {
     const sub = this.oldPassword.valueChanges.subscribe(() => {
       this.#incorrectPassword = false;
       this.newPassword.updateValueAndValidity();

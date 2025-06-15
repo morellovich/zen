@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
@@ -13,6 +13,5 @@ import { ZenPasswordChangeFormComponent } from '../zen-password-change-form/zen-
 })
 export class ZenPasswordChangeComponent {
   @Output() changed = new EventEmitter<never>();
-
-  constructor(public auth: AuthService) {}
+  auth = inject(AuthService);
 }

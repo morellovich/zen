@@ -83,16 +83,17 @@ export class ZenRolesInputComponent implements ControlValueAccessor, OnDestroy {
     else this.control.reset();
   }
 
-  registerOnChange(fn: (_: any) => void) {
+  registerOnChange(fn: (_: string[]) => unknown) {
     const sub = this.control.valueChanges.subscribe(fn);
     this.#subs.push(sub);
+    fn(this.control.value);
   }
 
   emitTouched() {
     this.touchedListeners.forEach(fn => fn());
   }
 
-  registerOnTouched(fn: any) {
+  registerOnTouched(fn: () => unknown) {
     this.touchedListeners.push(fn);
   }
 

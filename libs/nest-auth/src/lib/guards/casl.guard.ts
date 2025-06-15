@@ -47,6 +47,7 @@ export class CaslGuard extends AuthGuard('jwt') {
     );
     if (allowAnonymousClass) return true;
 
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     let req: any;
     const type = context.getType() as ContextType | 'graphql';
 

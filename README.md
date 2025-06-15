@@ -40,7 +40,7 @@ The project implements a fully featured authentication & authorization system wi
 
 **Requirements**
 
-- [Node v20](https://nodejs.org/)
+- [Node v22](https://nodejs.org/)
 - [Docker](https://www.docker.com/) or [Rancher Desktop](https://rancherdesktop.io/)
 
 We are utilizing pnpm as our package manager.  Though, you can utilize npm if you prefer by running the equivalent npm commands.
@@ -127,7 +127,7 @@ pnpm start
 - [x] [OpenTelemetry](https://opentelemetry.io/) branch demonstrates how to integrate and expose telemetry data for the API server.
 - [x] HTML canvas branch demonstrating integration of [babylon.js](https://www.babylonjs.com/) & [Fabric.js](http://fabricjs.com/).
 - [x] Internationalization branch with all text extracted into JSON files ready to be translated. [@ngx-translate](https://github.com/ngx-translate/core) was chosen over [@angular/localize](https://angular.io/api/localize) due to @angular/localize inability to change languages at runtime.
-- [x] Unity branch demonstrating how to compile a [Unity WebGL](https://docs.unity3d.com/2023.3/Documentation/Manual/webgl-intro.html) web player as an Angular component.
+- [x] Unity branch demonstrating how to compile a [Unity WebGL](https://docs.unity3d.com/6000.1/Documentation/Manual/webgl-intro.html) web player as an Angular component.
   * The payload for the Unity app is currently weighing in at ~109MB uncompressed and ~12.8MB compressed with brotli.
   * Custom Nx scripts have been integrated to generate C# GraphQL types for communicating with the API server via GraphQL.  This enables end-to-end typings.
   * The user management system has been unified across the entire monorepo and thus simplifies the creation of unique user experiences as a real-time web application.  This starter kit now has the ability to render real-time scenes and load in models dynamically at runtime via Unity's Addressable system.  It has never been easier to create exceptional enterprise grade metaverse experiences that are wired up to your own fleet of game servers delivering content on-demand.
@@ -140,7 +140,7 @@ pnpm start
 
 - [x] [Nx for project management](https://nx.dev/angular) to allow for the use of [Nx Console extensions for VSCode](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console). Nx Console is a GUI interface for monorepos that adds a lot of modern developer conveniences. It also helps to simplify the use of the various Angular & Nest code generation schematics available in the ecosystem.
 - [x] [Angular Language Service for VSCode](https://marketplace.visualstudio.com/items?itemName=Angular.ng-template) for modern IDE tooling.
-- [x] npm scripts for versioned releases of the Nest **api** server as a containerized Docker image. [node:20-alpine](https://hub.docker.com/_/node?tab=description&ref=hackernoon.com) is used as the Docker container base image and the appropriate `tsconfig.app.json` configurations are being applied for the Nest app.
+- [x] npm scripts for versioned releases of the Nest **api** server as a containerized Docker image. [node:22-alpine](https://hub.docker.com/_/node?tab=description&ref=hackernoon.com) is used as the Docker container base image and the appropriate `tsconfig.app.json` configurations are being applied for the Nest app.
 - [x] Example [Kubernetes](https://kubernetes.io/) deployment scripts.
 - [x] Enforced code formatting via [Prettier](https://prettier.io/) & [import-sort](https://www.npmjs.com/package/prettier-plugin-import-sort), guaranteeing all contributions to the project are standardized with predictable structure and clear legibility.
 - [x] [Commitizen](https://github.com/commitizen/cz-cli) for standardizing git commits.

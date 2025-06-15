@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApolloError } from '@apollo/client/errors';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { ApiError, Environment } from '@zen/common';
 import {
   AuthExchangeTokenGQL,
@@ -42,12 +42,12 @@ export class AuthService {
     return this.#accountInfo$;
   }
 
-  #loggedIn = false;
+  #loggedIn = !!token();
   get loggedIn() {
     return this.#loggedIn;
   }
 
-  #loggedIn$ = new BehaviorSubject(false);
+  #loggedIn$ = new BehaviorSubject(!!token());
   get loggedIn$() {
     return this.#loggedIn$.asObservable();
   }
@@ -62,21 +62,21 @@ export class AuthService {
     return this.#userRoles$.asObservable();
   }
 
-  constructor(
-    private router: Router,
-    private apollo: Apollo,
-    private ability: Ability,
-    private authLoginGQL: AuthLoginGQL,
-    private authExchangeTokenGQL: AuthExchangeTokenGQL,
-    private env: Environment,
-    getAccountInfoGQL: GetAccountInfoGQL
-  ) {
-    this.#accountInfo$ = getAccountInfoGQL.watch().valueChanges.pipe(
+  #getAccountInfoGQL = inject(GetAccountInfoGQL);
+  #router = inject(Router);
+  #apollo = inject(Apollo);
+  #ability = inject(PureAbility);
+  #authLoginGQL = inject(AuthLoginGQL);
+  #authExchangeTokenGQL = inject(AuthExchangeTokenGQL);
+  #env = inject(Environment);
+
+  constructor() {
+    this.#accountInfo$ = this.#getAccountInfoGQL.watch().valueChanges.pipe(
       map(({ data }) => data.accountInfo),
       share()
     );
 
-    if (this.validSession) {
+    if (this.#validSession) {
       try {
         // Initialize Apollo client state
         const roles = ls.get<string[]>(LocalStorageKey.roles, { decrypt: true });
@@ -86,26 +86,30 @@ export class AuthService {
         this.#loggedIn$.next(this.#loggedIn);
         this.#userId = ls.get(LocalStorageKey.userId, { decrypt: true });
 
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         const rules: Array<any> | null = ls.get(LocalStorageKey.rules, { decrypt: true });
-        if (Array.isArray(rules)) this.ability.update(rules);
+        if (Array.isArray(rules)) this.#ability.update(rules);
 
-        switch (env.auth.exchangeStrategy) {
+        switch (this.#env.auth.exchangeStrategy) {
           case 'app-load':
-            this.exchangeToken();
+            this.#exchangeToken();
             break;
           case 'efficient':
-            if (!this.rememberMe && this.sessionTimeRemaining <= env.auth.jwtExchangeInterval) {
-              this.exchangeToken();
-            } else if (
-              this.rememberMe &&
-              this.sessionTimeRemaining <= env.auth.rememberMeExchangeThreshold
+            if (
+              !this.#rememberMe &&
+              this.#sessionTimeRemaining <= this.#env.auth.jwtExchangeInterval
             ) {
-              this.exchangeToken();
+              this.#exchangeToken();
+            } else if (
+              this.#rememberMe &&
+              this.#sessionTimeRemaining <= this.#env.auth.rememberMeExchangeThreshold
+            ) {
+              this.#exchangeToken();
             }
             break;
         }
 
-        this.startExchangeInterval();
+        this.#startExchangeInterval();
       } catch (error) {
         console.error('AuthService failed to initialize', error);
         this.logout();
@@ -116,7 +120,7 @@ export class AuthService {
   }
 
   login(data: AuthLoginInput) {
-    return this.authLoginGQL.fetch({ data }, { fetchPolicy: 'no-cache' }).pipe(
+    return this.#authLoginGQL.fetch({ data }, { fetchPolicy: 'no-cache' }).pipe(
       tap(({ data: { authLogin } }) => {
         this.setSession(authLogin);
       })
@@ -124,12 +128,12 @@ export class AuthService {
   }
 
   loginWithGoogle() {
-    window.location.href = this.env.url.api + '/auth/google';
+    window.location.href = this.#env.url.api + '/auth/google';
   }
 
   logout() {
     this.clearSession();
-    this.router.navigateByUrl('/login');
+    this.#router.navigateByUrl('/login');
   }
 
   setSession(authSession: AuthSession) {
@@ -142,7 +146,7 @@ export class AuthService {
 
     this.#userId = authSession.userId;
 
-    this.ability.update(authSession.rules);
+    this.#ability.update(authSession.rules);
 
     token.set(authSession.token);
 
@@ -160,7 +164,7 @@ export class AuthService {
       this.#loggedIn$.next(true);
     }
 
-    this.startExchangeInterval();
+    this.#startExchangeInterval();
   }
 
   rolesEqual(a: string | string[] | null | undefined, b: string | string[] | null | undefined) {
@@ -205,15 +209,15 @@ export class AuthService {
     return true;
   }
 
-  private get rememberMe() {
+  get #rememberMe() {
     return ls.get<boolean>(LocalStorageKey.rememberMe);
   }
 
-  private get validSession(): boolean {
-    return this.sessionTimeRemaining > 0;
+  get #validSession(): boolean {
+    return this.#sessionTimeRemaining > 0;
   }
 
-  private get sessionTimeRemaining(): number {
+  get #sessionTimeRemaining(): number {
     const expiresOn = ls.get<number>(LocalStorageKey.sessionExpiresOn);
     if (!expiresOn) return 0;
 
@@ -224,7 +228,7 @@ export class AuthService {
   }
 
   clearSession() {
-    this.stopExchangeInterval();
+    this.#stopExchangeInterval();
     ls.remove(LocalStorageKey.userId);
     ls.remove(LocalStorageKey.token);
     ls.remove(LocalStorageKey.sessionExpiresOn);
@@ -233,17 +237,17 @@ export class AuthService {
     ls.remove(LocalStorageKey.rules);
 
     this.#userId = null;
-    this.ability.update([]);
+    this.#ability.update([]);
     token.set(null);
     this.#userRoles = [];
     this.#userRoles$.next([]);
     this.#loggedIn = false;
     this.#loggedIn$.next(false);
-    this.apollo.client.cache.reset();
+    this.#apollo.client.cache.reset();
   }
 
-  private exchangeToken() {
-    this.authExchangeTokenGQL
+  #exchangeToken() {
+    this.#authExchangeTokenGQL
       .fetch(
         { data: { rememberMe: !!ls.get<boolean>(LocalStorageKey.rememberMe) } },
         { fetchPolicy: 'no-cache' }
@@ -252,34 +256,34 @@ export class AuthService {
         retry({
           delay: this.#retryStrategy({
             excludeStatusCodes: ['FORBIDDEN', 'UNAUTHENTICATED', 'INTERNAL_SERVER_ERROR'],
-            delay: this.env.auth.retryExchangeTokenDelay,
+            delay: this.#env.auth.retryExchangeTokenDelay,
           }),
         })
       )
       .subscribe({
         next: ({ data: { authExchangeToken } }) => {
           this.setSession(authExchangeToken);
-          if (!this.env.production) console.log('Exchanged token');
+          if (!this.#env.production) console.log('Exchanged token');
         },
         error: (error: ApolloError | string) => {
-          this.logout();
           console.error('Exchange token failed', error);
+          this.logout();
         },
       });
   }
 
-  private startExchangeInterval() {
-    if (!this.rememberMe && !this.#exchangeIntervalSubscription) {
-      this.#exchangeIntervalSubscription = interval(this.env.auth.jwtExchangeInterval).subscribe(
+  #startExchangeInterval() {
+    if (!this.#rememberMe && !this.#exchangeIntervalSubscription) {
+      this.#exchangeIntervalSubscription = interval(this.#env.auth.jwtExchangeInterval).subscribe(
         () => {
-          if (this.validSession) this.exchangeToken();
+          if (this.#validSession) this.#exchangeToken();
           else this.logout();
         }
       );
     }
   }
 
-  private stopExchangeInterval() {
+  #stopExchangeInterval() {
     if (this.#exchangeIntervalSubscription) {
       this.#exchangeIntervalSubscription.unsubscribe();
       this.#exchangeIntervalSubscription = undefined;

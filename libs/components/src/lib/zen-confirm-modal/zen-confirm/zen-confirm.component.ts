@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, Inject, Input, ViewChild, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, ViewChild, inject } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -19,17 +19,18 @@ export class ZenConfirmComponent implements AfterContentInit {
 
   translate = inject(TranslateService);
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: ZenConfirmOptions | undefined,
-    public dialogRef: MatDialogRef<ZenConfirmComponent>
-  ) {
+  data: ZenConfirmOptions | undefined = inject(MAT_DIALOG_DATA);
+  dialogRef = inject(MatDialogRef<ZenConfirmComponent>);
+
+  constructor() {
     this.titleTranslationKey = 'ARE_YOU_SURE';
     this.confirmTranslationKey = 'YES';
     this.cancelTranslationKey = 'NO';
 
-    if (data?.titleTranslationKey) this.titleTranslationKey = data.titleTranslationKey;
-    if (data?.confirmTranslationKey) this.confirmTranslationKey = data.confirmTranslationKey;
-    if (data?.cancelTranslationKey) this.cancelTranslationKey = data.cancelTranslationKey;
+    if (this.data?.titleTranslationKey) this.titleTranslationKey = this.data.titleTranslationKey;
+    if (this.data?.confirmTranslationKey)
+      this.confirmTranslationKey = this.data.confirmTranslationKey;
+    if (this.data?.cancelTranslationKey) this.cancelTranslationKey = this.data.cancelTranslationKey;
   }
 
   ngAfterContentInit() {

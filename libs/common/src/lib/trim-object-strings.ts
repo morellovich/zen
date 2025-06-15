@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 const isObject = (x: any) => typeof x === 'object' && x !== null && !Array.isArray(x);
 
 /**
@@ -23,7 +24,7 @@ const isObject = (x: any) => typeof x === 'object' && x !== null && !Array.isArr
  *
  * @example
  * ```ts
- * trimObjectStrings({ a: ''});
+ * trimObjectStrings({ a: '' });
  * ```
  * ```ts
  * { a: null }
@@ -31,7 +32,7 @@ const isObject = (x: any) => typeof x === 'object' && x !== null && !Array.isArr
  *
  * @example
  * ```ts
- * trimObjectStrings({ a: ''}, { convertEmptyStringTo: '' });
+ * trimObjectStrings({ a: '' }, { convertEmptyStringTo: '' });
  * ```
  * ```ts
  * { a: '' }

@@ -59,7 +59,6 @@ export class ZenLoginFormComponent implements OnInit, AfterContentInit, OnDestro
   @Input() doneMessageVisible = true;
   @Output() loggedIn = new EventEmitter();
 
-  #subs: Subscription[] = [];
   translate = inject(TranslateService);
   loading = false;
   done = false;
@@ -70,12 +69,10 @@ export class ZenLoginFormComponent implements OnInit, AfterContentInit, OnDestro
     password: new FormControl(),
     rememberMe: new FormControl(false, { nonNullable: true }),
   });
-
-  constructor(
-    private route: ActivatedRoute,
-    private auth: AuthService,
-    public env: Environment
-  ) {}
+  env = inject(Environment);
+  #subs: Subscription[] = [];
+  private route = inject(ActivatedRoute);
+  private auth = inject(AuthService);
 
   ngOnInit(): void {
     const sub = this.route.queryParamMap

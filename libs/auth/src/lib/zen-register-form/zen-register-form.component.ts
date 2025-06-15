@@ -6,6 +6,7 @@ import {
   OnDestroy,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import {
   FormControl,
@@ -90,12 +91,9 @@ export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {
       nonNullable: true,
     }),
   });
-
-  constructor(
-    private auth: AuthService,
-    private authRegisterGQL: AuthRegisterGQL,
-    public env: Environment
-  ) {}
+  env = inject(Environment);
+  private auth = inject(AuthService);
+  private authRegisterGQL = inject(AuthRegisterGQL);
 
   ngAfterContentInit() {
     setTimeout(() => {

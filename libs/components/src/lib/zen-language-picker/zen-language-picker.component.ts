@@ -10,7 +10,7 @@ import { ZenLanguagePickerModalComponent } from './zen-language-picker-modal/zen
   selector: 'zen-language-picker',
   templateUrl: 'zen-language-picker.component.html',
   standalone: true,
-  imports: [CommonModule, TranslateModule, MatDialogModule, ZenLanguagePickerModalComponent],
+  imports: [CommonModule, TranslateModule, MatDialogModule],
 })
 export class ZenLanguagePickerComponent {
   dialog = inject(MatDialog);

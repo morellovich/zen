@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService } from '../auth.service';
@@ -11,5 +11,5 @@ import { AuthService } from '../auth.service';
   imports: [AsyncPipe, TranslateModule],
 })
 export class ZenAccountInfoComponent {
-  constructor(public auth: AuthService) {}
+  public auth = inject(AuthService);
 }

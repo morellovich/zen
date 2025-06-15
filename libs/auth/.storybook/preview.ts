@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Ability } from '@casl/ability';
+import { PureAbility } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -24,7 +24,7 @@ const preview: Preview = {
         { provide: Environment, useValue: EnvironmentDev },
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
         {
-          provide: Ability,
+          provide: PureAbility,
           useValue: createPrismaAbility(undefined, {
             detectSubjectType: object => object['__typename'],
           }),

@@ -4,7 +4,7 @@
   }
 
   @if(env.enableGoogleOAuth) {
-    <button type="button" (click)="loginWithGoogle()" mat-raised-button class="w-100 fs-4 py-1 my-2" [disabled]="loading">
+    <button type="button" matButton="elevated" (click)="loginWithGoogle()" class="w-100 fs-4 py-1 my-2" [disabled]="loading">
       <i class="fa-brands fa-fw fa-google me-1"></i>
       {{'SIGN_UP_WITH_GOOGLE' | translate}}
     </button>
@@ -29,7 +29,7 @@
   <mat-form-field hideRequiredMarker class="w-100 mb-2">
     <mat-label>{{'CONFIRM_PASSWORD' | translate}}</mat-label>
     <input matInput autocomplete="new-password" [type]="hidePassword ? 'password' : 'text'" [formControl]="passwordConfirm">
-    <button type="button" mat-icon-button matSuffix (click)="hidePassword = !hidePassword" tabindex="-1" title="{{'TOGGLE_SHOW_PASSWORD' | translate}}">
+    <button type="button" matIconButton matSuffix (click)="hidePassword = !hidePassword" tabindex="-1" title="{{'TOGGLE_SHOW_PASSWORD' | translate}}">
       <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
     </button>
 
@@ -43,14 +43,14 @@
   </mat-form-field>
 
   <div class="mb-4">
-    <mat-checkbox color="primary" [formControl]="acceptTerms">{{'I_ACCEPT_THE_TERMS' | translate}}</mat-checkbox>
-
+    <mat-checkbox [formControl]="acceptTerms">{{'I_ACCEPT_THE_TERMS' | translate}}</mat-checkbox>
+    
     @if(acceptTerms.invalid && acceptTerms.touched) {
       <mat-error>{{'ACCEPT_THE_TERMS' | translate}}</mat-error>
     }
   </div>
 
-  <button type="submit" mat-raised-button color="primary" class="w-100 fs-4 py-1" [disabled]="!form.valid">
+  <button type="submit" matButton="filled" class="w-100 fs-4 py-1" [disabled]="!form.valid">
     <i class="fa-solid fa-fw fa-cloud-upload-alt me-1"></i>
     {{'SUBMIT' | translate}}
   </button>

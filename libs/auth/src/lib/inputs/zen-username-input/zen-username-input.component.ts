@@ -97,7 +97,7 @@ export class ZenUsernameInputComponent implements ControlValueAccessor, OnDestro
     this.control.setValue(value);
   }
 
-  registerOnChange(fn: (_: any) => void) {
+  registerOnChange(fn: (_: string) => unknown) {
     const sub = this.control.valueChanges.subscribe(fn);
     this.#subs.push(sub);
     fn(this.control.value);
@@ -107,7 +107,7 @@ export class ZenUsernameInputComponent implements ControlValueAccessor, OnDestro
     this.touchedListeners.forEach(fn => fn());
   }
 
-  registerOnTouched(fn: any) {
+  registerOnTouched(fn: () => unknown) {
     this.touchedListeners.push(fn);
   }
 
