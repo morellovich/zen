@@ -14,11 +14,6 @@
       "implementation": "./src/generate-graphql/executor",
       "schema": "./src/generate-graphql/schema.json",
       "description": "generate-graphql executor"
-    },
-    "test": {
-      "implementation": "./src/test/executor",
-      "schema": "./src/test/schema.json",
-      "description": "test executor"
     }
   }
 }
