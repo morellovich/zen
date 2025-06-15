@@ -5,7 +5,7 @@
   "sourceRoot": "apps/zen-unity",
   "targets": {
     "build": {
-      "executor": "@zen/nx-unity-plugin:build",
+      "executor": "@zen/nx-plugin-unity:build",
       "options": {
         "configuration": "Debug",
         "executeMethod": "Builder.BuildWebGLDevelopment",
@@ -21,10 +21,10 @@
       }
     },
     "test": {
-      "executor": "@zen/nx-unity-plugin:test"
+      "executor": "@zen/nx-plugin-unity:test"
     },
     "lint": {
-      "executor": "@zen/nx-unity-plugin:format",
+      "executor": "@zen/nx-plugin-unity:format",
       "options": {
         "verifyNoChanges": true,
         "projects": [
@@ -34,7 +34,7 @@
       }
     },
     "format": {
-      "executor": "@zen/nx-unity-plugin:format",
+      "executor": "@zen/nx-plugin-unity:format",
       "options": {
         "projects": [
           "apps/zen-unity/Assembly-CSharp-Editor.csproj",
@@ -43,7 +43,7 @@
       }
     },
     "generate-graphql": {
-      "executor": "@zen/nx-unity-plugin:generate-graphql",
+      "executor": "@zen/nx-plugin-unity:generate-graphql",
       "options": {
         "schema": "http://localhost:7080/graphql",
         "outputPath": "apps/zen-unity/Assets/_Project/Scripts/GraphQL/Generated",

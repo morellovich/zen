@@ -1,5 +1,5 @@
 {
-  "name": "@zen/nx-unity-plugin",
+  "name": "@zen/nx-plugin-unity",
   "version": "0.0.1",
   "dependencies": {
     "@graphql-codegen/cli": "^5.0.3",

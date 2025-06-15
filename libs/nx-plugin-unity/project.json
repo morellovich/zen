@@ -1,7 +1,7 @@
 {
-  "name": "nx-unity-plugin",
+  "name": "nx-plugin-unity",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/nx-unity-plugin/src",
+  "sourceRoot": "libs/nx-plugin-unity/src",
   "projectType": "library",
   "tags": [],
   "targets": {
@@ -9,28 +9,28 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/nx-unity-plugin",
-        "main": "libs/nx-unity-plugin/src/index.ts",
-        "tsConfig": "libs/nx-unity-plugin/tsconfig.lib.json",
+        "outputPath": "dist/libs/nx-plugin-unity",
+        "main": "libs/nx-plugin-unity/src/index.ts",
+        "tsConfig": "libs/nx-plugin-unity/tsconfig.lib.json",
         "assets": [
-          "libs/nx-unity-plugin/*.md",
+          "libs/nx-plugin-unity/*.md",
           {
-            "input": "./libs/nx-unity-plugin/src",
+            "input": "./libs/nx-plugin-unity/src",
             "glob": "**/!(*.ts)",
             "output": "./src"
           },
           {
-            "input": "./libs/nx-unity-plugin/src",
+            "input": "./libs/nx-plugin-unity/src",
             "glob": "**/*.d.ts",
             "output": "./src"
           },
           {
-            "input": "./libs/nx-unity-plugin",
+            "input": "./libs/nx-plugin-unity",
             "glob": "generators.json",
             "output": "."
           },
           {
-            "input": "./libs/nx-unity-plugin",
+            "input": "./libs/nx-plugin-unity",
             "glob": "executors.json",
             "output": "."
           }
