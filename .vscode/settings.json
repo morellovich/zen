@@ -1,4 +1,5 @@
 {
   "vsicons.presets.angular": true,
+  "eslint.validate": ["json"],
   "dotnet.preferCSharpExtension": true
 }
