@@ -2,10 +2,11 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { CodegenConfig, generate } from '@graphql-codegen/cli';
+import { PromiseExecutor } from '@nx/devkit';
 
-import { GenerateGqlExecutorSchema } from './schema';
+import { GenerateGraphqlExecutorSchema } from './schema';
 
-export default async function runExecutor(options: GenerateGqlExecutorSchema) {
+const runExecutor: PromiseExecutor<GenerateGraphqlExecutorSchema> = async options => {
   console.log(`------------------------ @graphql-codegen/cli ------------------------`);
 
   const TYPES_PATH = path.join(options.outputPath, 'Types.cs');
@@ -47,4 +48,6 @@ export default async function runExecutor(options: GenerateGqlExecutorSchema) {
   return {
     success: true,
   };
-}
+};
+
+export default runExecutor;

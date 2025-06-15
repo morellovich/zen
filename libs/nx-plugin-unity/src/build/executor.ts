@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, rm } from 'node:fs/promises';
 
-import type { ExecutorContext } from '@nx/devkit';
+import { PromiseExecutor } from '@nx/devkit';
 
 import { BuildExecutorSchema } from './schema';
 
@@ -31,7 +31,7 @@ const runSpawn = (cmd: string, args: ReadonlyArray<string>) =>
     });
   });
 
-export default async function runExecutor(options: BuildExecutorSchema, context: ExecutorContext) {
+const runExecutor: PromiseExecutor<BuildExecutorSchema> = async (options, context) => {
   const unityProjectRoot =
     options.unityProjectPath ?? context.projectsConfigurations.projects[context.projectName].root;
 
@@ -68,15 +68,21 @@ export default async function runExecutor(options: BuildExecutorSchema, context:
     const streamingAssetsSource = `dist/apps/${context.projectName}/StreamingAssets`;
     if (existsSync(streamingAssetsSource)) {
       const streamingAssetsDestination = options.outputPath + '/StreamingAssets';
-      await cp(streamingAssetsSource, streamingAssetsDestination, { recursive: true });
+      await cp(streamingAssetsSource, streamingAssetsDestination, {
+        recursive: true,
+      });
     }
 
     const addressablesSource = `${unityProjectRoot}/ServerData`;
     if (existsSync(addressablesSource)) {
       const addressablesDestination = options.outputPath + '/ServerData';
-      await cp(addressablesSource, addressablesDestination, { recursive: true });
+      await cp(addressablesSource, addressablesDestination, {
+        recursive: true,
+      });
     }
   }
 
   return result;
-}
+};
+
+export default runExecutor;

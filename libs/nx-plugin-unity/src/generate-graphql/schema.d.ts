@@ -1,4 +1,4 @@
-export interface GenerateGqlExecutorSchema {
+export interface GenerateGraphqlExecutorSchema {
   outputPath?: string;
   schema?: string;
   documents?: string[];

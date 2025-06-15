@@ -7,7 +7,7 @@ import { readdir } from 'node:fs/promises';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 
-import type { ExecutorContext } from '@nx/devkit';
+import { PromiseExecutor } from '@nx/devkit';
 
 import { FormatExecutorSchema } from './schema';
 
@@ -43,10 +43,7 @@ function getCommand(filePath: string, options: FormatExecutorSchema) {
   return command;
 }
 
-export default async function runExecutor(
-  options: FormatExecutorSchema,
-  context: ExecutorContext
-): Promise<{ success: boolean }> {
+const runExecutor: PromiseExecutor<FormatExecutorSchema> = async (options, context) => {
   try {
     const unityProjectRoot =
       options.unityProjectPath ?? context.projectsConfigurations.projects[context.projectName].root;
@@ -78,4 +75,6 @@ export default async function runExecutor(
   }
 
   return { success: true };
-}
+};
+
+export default runExecutor;
