@@ -1,4 +1,4 @@
-import { Directive, Input, TemplateRef } from '@angular/core';
+import { Directive, Input, TemplateRef, inject } from '@angular/core';
 import { DetailTemplateShowIfFn } from '@progress/kendo-angular-grid';
 
 @Directive({
@@ -7,6 +7,5 @@ import { DetailTemplateShowIfFn } from '@progress/kendo-angular-grid';
 })
 export class ZenGridDetailTemplateDirective {
   @Input() zenGridDetailTemplateShowIf!: DetailTemplateShowIfFn;
-
-  constructor(public host: TemplateRef<any>) {}
+  host = inject(TemplateRef<any>);
 }

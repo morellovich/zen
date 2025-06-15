@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   CheckboxColumnComponent,
   CommandColumnComponent,
@@ -13,7 +13,7 @@ import { StatePersistingService } from './state-persisting.service';
   providedIn: 'root',
 })
 export class KendoGridSettingsService {
-  constructor(private statePersistingService: StatePersistingService) {}
+  private statePersistingService = inject(StatePersistingService);
 
   get(token: string) {
     const gridSettings = this.statePersistingService.get(token) as KendoGridSettings<any>;
