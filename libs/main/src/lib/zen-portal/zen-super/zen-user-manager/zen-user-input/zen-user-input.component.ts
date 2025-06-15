@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Inject } from '@angular/core';
+import { Component, HostListener, Inject, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -61,18 +61,18 @@ export class ZenUserInputComponent {
     this.dialogRef.close();
   }
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: DialogData,
-    public dialogRef: MatDialogRef<ZenUserInputComponent>,
-    private apollo: Apollo,
-    private snackBar: MatSnackBar,
-    private snackBarError: ZenSnackbarError,
-    private updateOneUserGQL: UpdateOneUserGQL
-  ) {
-    if (data.action === 'edit') {
-      this.username.setValue(data.item.username);
-      this.email.setValue(data.item.email);
-      this.roles.setValue(data.item.roles);
+  data: DialogData = inject(MAT_DIALOG_DATA);
+  dialogRef = inject(MatDialogRef<ZenUserInputComponent>);
+  private apollo = inject(Apollo);
+  private snackBar = inject(MatSnackBar);
+  private snackBarError = inject(ZenSnackbarError);
+  private updateOneUserGQL = inject(UpdateOneUserGQL);
+
+  constructor() {
+    if (this.data.action === 'edit') {
+      this.username.setValue(this.data.item.username);
+      this.email.setValue(this.data.item.email);
+      this.roles.setValue(this.data.item.roles);
     }
   }
 
