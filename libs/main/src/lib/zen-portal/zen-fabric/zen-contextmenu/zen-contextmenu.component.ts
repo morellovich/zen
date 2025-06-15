@@ -4,7 +4,7 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 document.addEventListener('contextmenu', event => {
   const eventTarget = event?.target as HTMLElement;
-  eventTarget?.className?.includes('cdk-overlay') && event.preventDefault();
+  if (eventTarget?.className?.includes('cdk-overlay')) event.preventDefault();
 });
 
 export interface ZenMenuItem {
