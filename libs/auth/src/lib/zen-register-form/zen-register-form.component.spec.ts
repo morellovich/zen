@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TranslateModule } from '@ngx-translate/core';
 import { Environment, EnvironmentDev } from '@zen/common';
 import {
   AuthRegister,
@@ -19,7 +20,12 @@ describe('ZenRegisterFormComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [ApolloTestingModule, ZenRegisterFormComponent, NoopAnimationsModule],
+      imports: [
+        ApolloTestingModule,
+        ZenRegisterFormComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+      ],
       providers: [
         AuthRegisterGQL,
         { provide: AuthService, useValue: {} },
