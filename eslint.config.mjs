@@ -1,6 +1,12 @@
 import nx from '@nx/eslint-plugin';
+import { globalIgnores } from 'eslint/config';
 
 export default [
+    globalIgnores([
+      'node_modules',
+      'apps/zen-unity',
+      'apps/portal/src/assets/unity'
+    ]),
     {
     files: ['**/*.json'],
     // Override or add rules here
