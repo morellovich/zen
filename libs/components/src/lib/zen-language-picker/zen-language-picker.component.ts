@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { languages } from '@zen/common';
@@ -10,7 +11,7 @@ import { ZenLanguagePickerModalComponent } from './zen-language-picker-modal/zen
   selector: 'zen-language-picker',
   templateUrl: 'zen-language-picker.component.html',
   standalone: true,
-  imports: [CommonModule, TranslateModule, MatDialogModule],
+  imports: [CommonModule, TranslateModule, MatDialogModule, MatButtonModule],
 })
 export class ZenLanguagePickerComponent {
   dialog = inject(MatDialog);
