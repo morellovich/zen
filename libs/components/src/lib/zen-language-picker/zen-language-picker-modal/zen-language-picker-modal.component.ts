@@ -6,6 +6,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { languages } from '@zen/common';
+import ls from 'localstorage-slim';
+
+export const CURRENT_LANG_LS_KEY = 'currentLang';
 
 @Component({
   selector: 'zen-language-picker-modal',
@@ -37,6 +40,7 @@ export class ZenLanguagePickerModalComponent {
   set selected(value: string) {
     this.translate.use(value);
     this.#selected = value;
-    this.dialogRef.close(this.selected);
+    ls.set(CURRENT_LANG_LS_KEY, value);
+    this.dialogRef.close(value);
   }
 }

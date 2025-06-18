@@ -13,8 +13,10 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { authInterceptorFn, token } from '@zen/auth';
 import { Environment } from '@zen/common';
+import { CURRENT_LANG_LS_KEY } from '@zen/components';
 import { ZenGraphQLModule } from '@zen/graphql';
 import { possibleTypes, typePolicies } from '@zen/graphql/client';
+import ls from 'localstorage-slim';
 
 import { environment } from '../environments/environment';
 import { APP_ROUTES } from './app.routes';
@@ -22,6 +24,8 @@ import { APP_ROUTES } from './app.routes';
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, '/assets/i18n/', '.json');
 }
+
+const currentLang = ls.get<string>(CURRENT_LANG_LS_KEY);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -64,7 +68,7 @@ export const appConfig: ApplicationConfig = {
         },
       }),
       TranslateModule.forRoot({
-        defaultLanguage: environment.defaultLanguage,
+        defaultLanguage: currentLang ? currentLang : environment.defaultLanguage,
         loader: {
           provide: TranslateLoader,
           useFactory: createTranslateLoader,

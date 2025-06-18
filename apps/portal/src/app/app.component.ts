@@ -4,7 +4,12 @@ import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService, IfLoggedInDirective, RolesDirective, ZenLoginLinkComponent } from '@zen/auth';
 import { Environment } from '@zen/common';
-import { ZenLanguagePickerComponent, ZenLayoutComponent } from '@zen/components';
+import {
+  CURRENT_LANG_LS_KEY,
+  ZenLanguagePickerComponent,
+  ZenLayoutComponent,
+} from '@zen/components';
+import ls from 'localstorage-slim';
 
 @Component({
   selector: 'zen-root',
@@ -27,6 +32,7 @@ export class AppComponent {
   private env = inject(Environment);
 
   constructor() {
-    this.translate.currentLang = this.env.defaultLanguage;
+    const currentLang = ls.get<string>(CURRENT_LANG_LS_KEY);
+    this.translate.currentLang = currentLang ? currentLang : this.env.defaultLanguage;
   }
 }
