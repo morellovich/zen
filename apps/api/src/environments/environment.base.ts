@@ -47,9 +47,7 @@ export abstract class EnvironmentBase {
         serviceName: string;
         exporters: {
           trace?: ConstructorParameters<typeof OTLPTraceExporter>[0];
-          traceConsole?: boolean;
           meter?: ConstructorParameters<typeof OTLPMetricExporter>[0];
-          meterConsole?: boolean;
         };
       };
 }
