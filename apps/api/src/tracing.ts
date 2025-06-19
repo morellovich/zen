@@ -45,6 +45,6 @@ if (environment.openTelemetry) {
     ],
   });
 
-  logger.log('Started instrumentation');
   sdk.start();
+  logger.log('Started telemetry');
 }
