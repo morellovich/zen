@@ -13,7 +13,7 @@ import { ApolloTestingModule } from 'apollo-angular/testing';
 import { AuthService } from '../src/lib/auth.service';
 
 function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, '/assets/i18n/', '.json');
+  return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
 }
 
 const preview: Preview = {

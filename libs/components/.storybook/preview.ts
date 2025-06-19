@@ -7,7 +7,7 @@ import { Preview, moduleMetadata } from '@storybook/angular';
 import { Environment, EnvironmentDev } from '@zen/common';
 
 function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, '/assets/i18n/', '.json');
+  return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
 }
 
 const preview: Preview = {
