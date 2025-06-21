@@ -4,6 +4,7 @@
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, rm } from 'node:fs/promises';
+import path from 'node:path';
 
 import { PromiseExecutor } from '@nx/devkit';
 
@@ -59,23 +60,23 @@ const runExecutor: PromiseExecutor<BuildExecutorSchema> = async (options, contex
 
     await mkdir(options.outputPath);
 
-    const buildSource = `dist/apps/${context.projectName}/Build`;
+    const buildSource = path.join('dist/apps', context.projectName, 'Build');
     if (existsSync(buildSource)) {
-      const buildDestination = options.outputPath + '/Build';
+      const buildDestination = path.join(options.outputPath, 'Build');
       await cp(buildSource, buildDestination, { recursive: true });
     }
 
-    const streamingAssetsSource = `dist/apps/${context.projectName}/StreamingAssets`;
+    const streamingAssetsSource = path.join('dist/apps', context.projectName, 'StreamingAssets');
     if (existsSync(streamingAssetsSource)) {
-      const streamingAssetsDestination = options.outputPath + '/StreamingAssets';
+      const streamingAssetsDestination = path.join(options.outputPath, 'StreamingAssets');
       await cp(streamingAssetsSource, streamingAssetsDestination, {
         recursive: true,
       });
     }
 
-    const addressablesSource = `${unityProjectRoot}/ServerData`;
+    const addressablesSource = path.join(unityProjectRoot, 'ServerData');
     if (existsSync(addressablesSource)) {
-      const addressablesDestination = options.outputPath + '/ServerData';
+      const addressablesDestination = path.join(options.outputPath, 'ServerData');
       await cp(addressablesSource, addressablesDestination, {
         recursive: true,
       });
