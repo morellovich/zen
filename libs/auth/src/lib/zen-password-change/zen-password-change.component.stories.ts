@@ -1,6 +1,8 @@
 import { Meta, moduleMetadata } from '@storybook/angular';
-import { AuthPasswordChangeGQL } from '@zen/graphql';
+import { AccountInfo, AuthPasswordChangeGQL } from '@zen/graphql';
+import { BehaviorSubject } from 'rxjs';
 
+import { AuthService } from '../auth.service';
 import { ZenPasswordChangeComponent } from './zen-password-change.component';
 
 export default {
@@ -8,7 +10,15 @@ export default {
   component: ZenPasswordChangeComponent,
   decorators: [
     moduleMetadata({
-      providers: [AuthPasswordChangeGQL],
+      providers: [
+        AuthPasswordChangeGQL,
+        {
+          provide: AuthService,
+          useValue: {
+            accountInfo$: new BehaviorSubject<AccountInfo>({ hasPassword: true }),
+          },
+        },
+      ],
     }),
   ],
 } as Meta<ZenPasswordChangeComponent>;
