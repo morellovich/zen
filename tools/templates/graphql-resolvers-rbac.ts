@@ -35,7 +35,7 @@ export const typeDefs = null;
 // \`;
 
 @Resolver('${name}')
-@UseGuards(RolesGuard('Prisma'))
+@UseGuards(RolesGuard('${role}'))
 export class ${name}Resolver {
   constructor(
     private readonly prisma: PrismaService,
