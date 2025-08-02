@@ -1,4 +1,4 @@
-const lowercase = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
+const camel = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 
 export function GraphQLResolversRBACTemplate(name: string, role: string) {
   return `import { UseGuards } from '@nestjs/common';
@@ -35,7 +35,7 @@ export const typeDefs = null;
 // \`;
 
 @Resolver('${name}')
-@UseGuards(RolesGuard('Prisma'))
+@UseGuards(RolesGuard('${role}'))
 export class ${name}Resolver {
   constructor(
     private readonly prisma: PrismaService,
@@ -44,67 +44,67 @@ export class ${name}Resolver {
 
   @Query()
   async findUnique${name}(@Args() args: FindUnique${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.findUnique(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.findUnique(this.prismaSelect.getArgs(args, info));
   }
 
   @Query()
   async findFirst${name}(@Args() args: FindFirst${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.findFirst(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.findFirst(this.prismaSelect.getArgs(args, info));
   }
 
   @Query()
   async findMany${name}(@Args() args: FindMany${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.findMany(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.findMany(this.prismaSelect.getArgs(args, info));
   }
 
   @Query()
   async findMany${name}Count(@Args() args: FindMany${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.count(this.prismaSelect.getArgs(args, info) as any);
+    return this.prisma.${camel(name)}.count(this.prismaSelect.getArgs(args, info) as any);
   }
 
   @Query()
   async aggregate${name}(@Args() args: Aggregate${name}Args) {
-    return this.prisma.${lowercase(name)}.aggregate(args);
+    return this.prisma.${camel(name)}.aggregate(args);
   }
 
   @Mutation()
   async createOne${name}(@Args() args: CreateOne${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.create(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.create(this.prismaSelect.getArgs(args, info));
   }
 
   @Mutation()
   async createMany${name}(@Args() args: CreateMany${name}Args) {
-    return this.prisma.${lowercase(name)}.createMany(args);
+    return this.prisma.${camel(name)}.createMany(args);
   }
 
   @Mutation()
   async createMany${name}AndReturn(@Args() args: CreateMany${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.createManyAndReturn(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.createManyAndReturn(this.prismaSelect.getArgs(args, info));
   }
 
   @Mutation()
   async updateOne${name}(@Args() args: UpdateOne${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.update(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.update(this.prismaSelect.getArgs(args, info));
   }
 
   @Mutation()
   async upsertOne${name}(@Args() args: UpsertOne${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.upsert(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.upsert(this.prismaSelect.getArgs(args, info));
   }
 
   @Mutation()
   async deleteOne${name}(@Args() args: DeleteOne${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.delete(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.delete(this.prismaSelect.getArgs(args, info));
   }
 
   @Mutation()
   async deleteMany${name}(@Args() args: DeleteMany${name}Args) {
-    return this.prisma.${lowercase(name)}.deleteMany(args);
+    return this.prisma.${camel(name)}.deleteMany(args);
   }
 
   @Mutation()
   async updateMany${name}(@Args() args: UpdateMany${name}Args, @Info() info: GraphQLResolveInfo) {
-    return this.prisma.${lowercase(name)}.updateMany(this.prismaSelect.getArgs(args, info));
+    return this.prisma.${camel(name)}.updateMany(this.prismaSelect.getArgs(args, info));
   }
 }
 `;
