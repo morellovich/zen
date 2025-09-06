@@ -78,7 +78,7 @@
     "@apollo/client": "^3.14.0",
     "@casl/angular": "~9.0.4",
     "@eslint/js": "^9.35.0",
-    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-free": "^7.0.1",
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/fragment-matcher": "^5.1.0",
     "@graphql-codegen/typescript": "^4.1.6",
@@ -145,7 +145,7 @@
     "storybook": "^9.1.5",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
-    "typescript": "~5.8.3",
+    "typescript": "~5.9.2",
     "typescript-eslint": "^8.42.0",
     "webpack-cli": "^5.1.4",
     "zone.js": "~0.15.1"
