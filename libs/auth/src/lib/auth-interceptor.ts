@@ -2,7 +2,7 @@ import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/h
 import { inject } from '@angular/core';
 import { Environment } from '@zen/common';
 
-import { token } from './token.signal';
+import { token } from './token';
 
 export const authInterceptorFn: HttpInterceptorFn = (
   req: HttpRequest<unknown>,

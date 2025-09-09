@@ -15,7 +15,7 @@ import ls from 'localstorage-slim';
 import { BehaviorSubject, Subscription, interval, map, share, throwError, timer } from 'rxjs';
 import { retry, tap } from 'rxjs/operators';
 
-import { token } from './token.signal';
+import { token } from './token';
 
 export enum LocalStorageKey {
   userId = 'userId',

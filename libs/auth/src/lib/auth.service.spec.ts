@@ -14,7 +14,7 @@ import { ApolloTestingController, ApolloTestingModule } from 'apollo-angular/tes
 import ls from 'localstorage-slim';
 
 import { AuthService, LocalStorageKey } from './auth.service';
-import { token } from './token.signal';
+import { token } from './token';
 
 describe('AuthService', () => {
   let service: AuthService;

@@ -5,7 +5,7 @@ import { ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
 import { AuthExchangeTokenGQL } from '@zen/graphql';
 
 import { AuthService } from '../auth.service';
-import { token } from '../token.signal';
+import { token } from '../token';
 
 /**
  * OIDC providers will redirect to this component after a successful login.
