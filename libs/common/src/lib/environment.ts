@@ -12,7 +12,7 @@ export abstract class Environment {
     /**
      * The rate in milliseconds at which the client will exchange the JWT when the user's session has `rememberMe = false`.
      * This should be less than the JWT expiration time.
-     * @see `apps/api/src/environments/environment.ts` for `Environment.jwtOptions.signOptions.expiresIn`
+     * @see `apps/api/src/environments/environment.ts` for `Environment.jwt.options.signOptions.expiresIn`
      * @example 30 * 60 * 1000 is 30 minutes
      */
     readonly jwtExchangeInterval: number;

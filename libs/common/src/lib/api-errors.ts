@@ -18,6 +18,7 @@ export enum AuthRegister {
 
 export enum AuthPasswordChange {
   WRONG_PASSWORD = 'Wrong password',
+  NO_PASSWORD_WHEN_EXPECTED = 'No password for account when expected',
 }
 
 export enum JwtErrors {

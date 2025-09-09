@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CaslFactory, JwtPayload, RequestUser } from '@zen/nest-auth';
+import { bcrypt, bcryptVerify } from 'hash-wasm';
 
 import { ConfigService } from '../config';
 import { AuthSession } from '../graphql/models/auth-session';
@@ -26,8 +27,8 @@ export class AuthService {
 
     /* eslint-disable  @typescript-eslint/no-non-null-assertion */
     const expiresIn = rememberMe
-      ? this.config.expiresInRememberMe
-      : (this.config.jwtOptions.signOptions!.expiresIn as number);
+      ? this.config.jwt.exchangeTokenLifetimeRememberMe
+      : (this.config.jwt.options.signOptions!.expiresIn as number);
 
     const token = this.jwtService.sign(jwtPayload, { expiresIn });
 
@@ -55,5 +56,17 @@ export class AuthService {
   async authorizeJwt(token: string): Promise<RequestUser | null> {
     const jwtPayload = this.jwtService.decode(token) as JwtPayload;
     return this.jwtStrategy.validate(jwtPayload);
+  }
+
+  async hashPassword(password: string) {
+    return bcrypt({
+      // @default 12 bytes
+      costFactor: this.config.bcrypt?.costFactor ?? 12,
+      password,
+      salt: crypto.getRandomValues(
+        // @default 16 bytes
+        new Uint8Array(this.config.bcrypt?.saltSize ?? 16)
+      ),
+    });
   }
 }

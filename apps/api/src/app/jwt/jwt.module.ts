@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '../config';
 @Module({
   imports: [
     NestJwtModule.registerAsync({
-      useFactory: (config: ConfigService) => config.jwtOptions,
+      useFactory: (config: ConfigService) => config.jwt.options,
       inject: [ConfigService],
     }),
     ConfigModule,

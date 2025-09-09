@@ -212,7 +212,7 @@ export class AuthResolver {
     });
     if (!userExists) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
 
-    const hashedPassword = await this.hashPassword(args.newPassword);
+    const hashedPassword = await this.auth.hashPassword(args.newPassword);
 
     const updatedUser = await this.prisma.user.update({
       where: { id: tokenPayload.sub },
@@ -240,7 +240,7 @@ export class AuthResolver {
     });
     if (emailTaken) throw new HttpException(ApiError.AuthRegister.EMAIL_TAKEN, 400);
 
-    const hashedPassword = await this.hashPassword(args.password);
+    const hashedPassword = await this.auth.hashPassword(args.password);
 
     const user = await this.prisma.user.create({
       data: {
@@ -295,31 +295,21 @@ export class AuthResolver {
     });
 
     if (!user) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
+    if (!user.password)
+      throw new UnauthorizedException(ApiError.AuthPasswordChange.NO_PASSWORD_WHEN_EXPECTED);
 
     const correctPassword = await bcryptVerify({
       password: args.oldPassword,
-      hash: user.password as string,
+      hash: user.password,
     });
     if (!correctPassword) throw new HttpException(ApiError.AuthPasswordChange.WRONG_PASSWORD, 400);
 
-    const hashedPassword = await this.hashPassword(args.newPassword);
+    const hashedPassword = await this.auth.hashPassword(args.newPassword);
 
     await this.prisma.user.update({
       where: { id: user.id },
       data: { password: hashedPassword },
       select: { id: true },
-    });
-  }
-
-  private async hashPassword(password: string) {
-    return bcrypt({
-      // @default 12 bytes
-      costFactor: this.config.bcrypt?.costFactor ?? 12,
-      password,
-      salt: crypto.getRandomValues(
-        // @default 16 bytes
-        new Uint8Array(this.config.bcrypt?.saltSize ?? 16)
-      ),
     });
   }
 }

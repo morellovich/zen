@@ -24,20 +24,21 @@ export const environment: EnvironmentBase = {
       maxFiles: 5,
     },
   },
-  jwtOptions: {
-    secret: process.env.JWT_PRIVATE_KEY,
-    signOptions: {
-      algorithm: 'HS256',
-      /**
-       * The client will exchange the token every 30 minutes during active sessions
-       * @see `libs\common\src\lib\environment` for `EnvironmentDev.jwtExchangeInterval`
-       */
-      expiresIn: 3600, // 1 hour (in seconds)
+  jwt: {
+    options: {
+      secret: process.env.JWT_PRIVATE_KEY,
+      signOptions: {
+        algorithm: 'HS256',
+        /**
+         * The client will exchange for a new access token every 3 minutes during active sessions
+         * @see `libs\common\src\lib\environment` for `EnvironmentDev.jwtExchangeInterval`
+         */
+        expiresIn: 4 * 60, // 4 minutes (in seconds)
+      },
     },
+    exchangeTokenLifetimeRememberMe: 3 * 30 * 24 * 60 * 60, // 3 months (in seconds)
   },
-  expiresInRememberMe: 7_776_000, // 90 days (in seconds)
   mail: {
-    // Docs: https://nodemailer.com/smtp/
     transport: {
       host: process.env.SMTP_SERVER,
       port: 587,
