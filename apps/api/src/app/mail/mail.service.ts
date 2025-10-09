@@ -1,5 +1,6 @@
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
+import { JwtPasswordResetPayload } from '@zen/nest-auth';
 
 import { ConfigService } from '../config';
 import { JwtService } from '../jwt';
@@ -33,7 +34,12 @@ export class MailService {
   }
 
   sendPasswordReset(user: Pick<User, 'id' | 'email'>) {
-    const token = this.jwtService.sign({ sub: user.id, aud: user.email }, { expiresIn: '1d' });
+    const jwtPasswordResetPayload: JwtPasswordResetPayload = {
+      sub: user.id,
+      use: 'password reset',
+    };
+
+    const token = this.jwtService.sign(jwtPasswordResetPayload, { expiresIn: '1d' });
 
     const context: PasswordResetContext = {
       siteUrl: this.config.siteUrl,

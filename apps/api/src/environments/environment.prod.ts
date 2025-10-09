@@ -22,6 +22,8 @@ export const environment: EnvironmentBase = {
     },
   },
   jwt: {
+    exchangeTokenLifetimeRememberMe: 3 * 30 * 24 * 60 * 60, // 3 months (in seconds)
+    exchangeTokenLifetimeDontRememberMe: 60 * 60, // 1 hour (in seconds)
     options: {
       secret: process.env.JWT_PRIVATE_KEY,
       publicKey: process.env.JWT_PUBLIC_KEY,
@@ -34,7 +36,6 @@ export const environment: EnvironmentBase = {
         expiresIn: 4 * 60, // 4 minutes (in seconds)
       },
     },
-    exchangeTokenLifetimeRememberMe: 3 * 30 * 24 * 60 * 60, // 3 months (in seconds)
   },
   mail: {
     transport: {

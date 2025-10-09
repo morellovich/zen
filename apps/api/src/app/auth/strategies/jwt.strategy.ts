@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ApiError } from '@zen/common';
-import { JwtPayload, RequestUser } from '@zen/nest-auth';
+import { JwtAccessPayload, RequestUser } from '@zen/nest-auth';
 import { Request } from 'express';
 import { Strategy } from 'passport-jwt';
 
@@ -24,17 +24,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         if (!authHeader) authHeader = req.header('authorization');
         if (!authHeader) throw new UnauthorizedException(ApiError.JwtErrors.NO_HEADER);
 
-        if (authHeader.slice(0, 7) !== 'Bearer ')
+        if (authHeader.startsWith('Bearer '))
           throw new UnauthorizedException(ApiError.JwtErrors.NO_BEARER);
-        // Strips `'Bearer '` and returns only the token
-        return authHeader.substring(7);
+
+        return authHeader.substring(7); // Strips `'Bearer '` and returns only the token
       },
     });
   }
 
-  async validate(payload: JwtPayload): Promise<RequestUser | null> {
-    // Validate the audience as the site URL
-    if (payload.aud !== this.config.siteUrl) return null;
+  async validate(payload: JwtAccessPayload): Promise<RequestUser | null> {
+    // Validate if it is an access token
+    if (payload.use !== 'access') return null;
 
     return {
       id: payload.sub,

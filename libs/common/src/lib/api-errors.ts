@@ -1,14 +1,11 @@
 export enum Codes {
   USER_NOT_FOUND = 'User not found',
   THROTTLE = 'ThrottlerException: Too Many Requests',
+  JWT_FAILED = 'JWT failed verification',
 }
 
 export enum AuthLogin {
   INCORRECT_PASSWORD = 'Incorrect password',
-}
-
-export enum AuthPasswordResetConfirmation {
-  JWT_FAILED = 'JWT failed verification',
 }
 
 export enum AuthRegister {
@@ -23,5 +20,5 @@ export enum AuthPasswordChange {
 
 export enum JwtErrors {
   NO_HEADER = 'No Authorization header found',
-  NO_BEARER = `No 'Bearer ' in Authorization header found`,
+  NO_BEARER = `Authorization header does not start with 'Bearer '`,
 }

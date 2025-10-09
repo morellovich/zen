@@ -30,9 +30,10 @@ export abstract class EnvironmentBase {
    */
   readonly publicRegistration: boolean;
   readonly jwt: {
+    readonly exchangeTokenLifetimeRememberMe: number;
+    readonly exchangeTokenLifetimeDontRememberMe: number;
     /** [Docs for options](https://www.passportjs.org/packages/passport-jwt/) */
     readonly options: JwtModuleOptions;
-    readonly exchangeTokenLifetimeRememberMe: number;
   };
   /** [Docs for options](https://nodemailer.com/smtp/) */
   readonly mail: Omit<MailerOptions, 'template'>;

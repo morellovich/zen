@@ -2,14 +2,14 @@ import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Environment } from '@zen/common';
 import { ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
-import { AuthExchangeTokenGQL } from '@zen/graphql';
+import { AuthRefreshSessionGQL } from '@zen/graphql';
 
 import { AuthService } from '../auth.service';
-import { token } from '../token';
 
 /**
  * OIDC providers will redirect to this component after a successful login.
- * A JWT is provided in the query string, which is exchanged for a session.
+ * A short lived exchange token is provided in the query string,
+ * which is then exchanged for a session.
  */
 @Component({
   selector: 'zen-login-confirmed',
@@ -23,25 +23,27 @@ export class ZenLoginConfirmedComponent {
   private env = inject(Environment);
   private auth = inject(AuthService);
   private snackbarError = inject(ZenSnackbarError);
-  private authExchangeTokenGQL = inject(AuthExchangeTokenGQL);
+  private authRefreshSessionGQL = inject(AuthRefreshSessionGQL);
 
   constructor() {
     const query = this.route.snapshot.queryParams;
-    const queryToken = decodeURIComponent(query['token']);
-    token.set(queryToken);
+    const exchangeToken = decodeURIComponent(query['token']);
 
-    this.authExchangeTokenGQL
+    this.authRefreshSessionGQL
       .fetch(
         {
-          data: { rememberMe: true },
+          data: {
+            exchangeToken,
+            rememberMe: true,
+          },
         },
         {
           fetchPolicy: 'no-cache',
         }
       )
       .subscribe({
-        next: ({ data: { authExchangeToken } }) => {
-          this.auth.setSession(authExchangeToken);
+        next: ({ data: { authRefreshSession } }) => {
+          this.auth.setSession(authRefreshSession);
           this.router.navigateByUrl(this.env.url.loginRedirect);
         },
         error: e => {

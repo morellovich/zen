@@ -1,7 +1,9 @@
-import { signal } from '@angular/core';
 import ls from 'localstorage-slim';
 
-let localStorageToken: string | null = ls.get('token', { decrypt: true });
-// export const token = signal(localStorageToken);
-export const token = () => localStorageToken;
-token.set = (t: string | null) => (localStorageToken = t);
+let _accessToken: string | null = ls.get('accessToken', { decrypt: true });
+export const accessToken = () => _accessToken;
+accessToken.set = (t: string | null) => (_accessToken = t);
+
+let _exchangeToken: string | null = ls.get('exchangeToken', { decrypt: true });
+export const exchangeToken = () => _exchangeToken;
+exchangeToken.set = (t: string | null) => (_exchangeToken = t);

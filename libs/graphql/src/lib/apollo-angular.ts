@@ -60,6 +60,11 @@ export type AuthPasswordResetRequestInput = {
   emailOrUsername: Scalars['String']['input'];
 };
 
+export type AuthRefreshSessionInput = {
+  exchangeToken: Scalars['String']['input'];
+  rememberMe: Scalars['Boolean']['input'];
+};
+
 export type AuthRegisterInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -68,11 +73,13 @@ export type AuthRegisterInput = {
 
 export type AuthSession = {
   __typename?: 'AuthSession';
-  expiresIn: Scalars['Int']['output'];
+  accessToken: Scalars['String']['output'];
+  accessTokenExpiresIn: Scalars['Int']['output'];
+  exchangeToken: Scalars['String']['output'];
+  exchangeTokenExpiresIn: Scalars['Int']['output'];
   rememberMe: Scalars['Boolean']['output'];
   roles: Array<Scalars['String']['output']>;
   rules: Array<Scalars['Json']['output']>;
-  token: Scalars['String']['output'];
   userId: Scalars['String']['output'];
 };
 
@@ -405,6 +412,7 @@ export type Query = {
   authExchangeToken: AuthSession;
   authLogin: AuthSession;
   authPasswordResetRequest?: Maybe<Scalars['Boolean']['output']>;
+  authRefreshSession: AuthSession;
   findFirstUser?: Maybe<User>;
   findManyUser: Array<User>;
   findManyUserCount: Scalars['Int']['output'];
@@ -434,6 +442,11 @@ export type QueryAuthLoginArgs = {
 
 export type QueryAuthPasswordResetRequestArgs = {
   data: AuthPasswordResetRequestInput;
+};
+
+
+export type QueryAuthRefreshSessionArgs = {
+  data?: InputMaybe<AuthRefreshSessionInput>;
 };
 
 
@@ -840,19 +853,26 @@ export type AuthExchangeTokenVariables = Exact<{
 }>;
 
 
-export type AuthExchangeToken = { __typename?: 'Query', authExchangeToken: { __typename?: 'AuthSession', userId: string, token: string, rememberMe: boolean, roles: Array<string>, expiresIn: number, rules: Array<any> } };
+export type AuthExchangeToken = { __typename?: 'Query', authExchangeToken: { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number } };
 
 export type AuthLoginVariables = Exact<{
   data: AuthLoginInput;
 }>;
 
 
-export type AuthLogin = { __typename?: 'Query', authLogin: { __typename?: 'AuthSession', userId: string, token: string, rememberMe: boolean, roles: Array<string>, expiresIn: number, rules: Array<any> } };
+export type AuthLogin = { __typename?: 'Query', authLogin: { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number } };
 
 export type GetAccountInfoVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetAccountInfo = { __typename?: 'Query', accountInfo: { __typename?: 'AccountInfo', username?: string | null, hasPassword: boolean, googleProfile?: { __typename?: 'GoogleProfile', email?: string | null, picture?: string | null } | null } };
+
+export type AuthRefreshSessionVariables = Exact<{
+  data: AuthRefreshSessionInput;
+}>;
+
+
+export type AuthRefreshSession = { __typename?: 'Query', authRefreshSession: { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number } };
 
 export type AuthPasswordChangeVariables = Exact<{
   data: AuthPasswordChangeInput;
@@ -866,7 +886,7 @@ export type AuthPasswordResetConfirmationVariables = Exact<{
 }>;
 
 
-export type AuthPasswordResetConfirmation = { __typename?: 'Mutation', authPasswordResetConfirmation: { __typename?: 'AuthSession', userId: string, token: string, rememberMe: boolean, roles: Array<string>, expiresIn: number, rules: Array<any> } };
+export type AuthPasswordResetConfirmation = { __typename?: 'Mutation', authPasswordResetConfirmation: { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number } };
 
 export type AuthPasswordResetRequestQueryVariables = Exact<{
   data: AuthPasswordResetRequestInput;
@@ -880,7 +900,7 @@ export type AuthRegisterVariables = Exact<{
 }>;
 
 
-export type AuthRegister = { __typename?: 'Mutation', authRegister: { __typename?: 'AuthSession', userId: string, token: string, rememberMe: boolean, roles: Array<string>, expiresIn: number, rules: Array<any> } };
+export type AuthRegister = { __typename?: 'Mutation', authRegister: { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number } };
 
 export type SampleVariables = Exact<{ [key: string]: never; }>;
 
@@ -889,7 +909,7 @@ export type Sample = { __typename?: 'Query', sample: boolean };
 
 export type AccountInfoFields = { __typename?: 'AccountInfo', username?: string | null, hasPassword: boolean, googleProfile?: { __typename?: 'GoogleProfile', email?: string | null, picture?: string | null } | null };
 
-export type AuthSessionFields = { __typename?: 'AuthSession', userId: string, token: string, rememberMe: boolean, roles: Array<string>, expiresIn: number, rules: Array<any> };
+export type AuthSessionFields = { __typename?: 'AuthSession', userId: string, roles: Array<string>, rules: Array<any>, rememberMe: boolean, exchangeToken: string, exchangeTokenExpiresIn: number, accessToken: string, accessTokenExpiresIn: number };
 
 export type GoogleProfileFields = { __typename?: 'GoogleProfile', email?: string | null, picture?: string | null };
 
@@ -1028,11 +1048,13 @@ export const AccountInfoFields = /*#__PURE__*/ gql`
 export const AuthSessionFields = /*#__PURE__*/ gql`
     fragment AuthSessionFields on AuthSession {
   userId
-  token
-  rememberMe
   roles
-  expiresIn
   rules
+  rememberMe
+  exchangeToken
+  exchangeTokenExpiresIn
+  accessToken
+  accessTokenExpiresIn
 }
     `;
 export const UserFields = /*#__PURE__*/ gql`
@@ -1091,6 +1113,24 @@ export const GetAccountInfoDocument = /*#__PURE__*/ gql`
   })
   export class GetAccountInfoGQL extends Apollo.Query<GetAccountInfo, GetAccountInfoVariables> {
     override document = GetAccountInfoDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const AuthRefreshSessionDocument = /*#__PURE__*/ gql`
+    query AuthRefreshSession($data: AuthRefreshSessionInput!) {
+  authRefreshSession(data: $data) {
+    ...AuthSessionFields
+  }
+}
+    ${AuthSessionFields}`;
+
+  @Injectable({
+    providedIn: ZenGraphQLModule
+  })
+  export class AuthRefreshSessionGQL extends Apollo.Query<AuthRefreshSession, AuthRefreshSessionVariables> {
+    override document = AuthRefreshSessionDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

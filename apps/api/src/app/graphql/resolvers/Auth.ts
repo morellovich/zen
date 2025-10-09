@@ -4,9 +4,15 @@ import { HttpException, Logger, UnauthorizedException, UseGuards } from '@nestjs
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Throttle } from '@nestjs/throttler';
 import { ApiError } from '@zen/common';
-import { CurrentUser, JwtPayload, RequestUser, RolesGuard } from '@zen/nest-auth';
+import {
+  CurrentUser,
+  JwtExchangePayload,
+  JwtPasswordResetPayload,
+  RequestUser,
+  RolesGuard,
+} from '@zen/nest-auth';
 import gql from 'graphql-tag';
-import { bcrypt, bcryptVerify } from 'hash-wasm';
+import { bcryptVerify } from 'hash-wasm';
 
 import { AuthService } from '../../auth';
 import { ConfigService } from '../../config';
@@ -21,6 +27,7 @@ import {
   AuthPasswordChangeInput,
   AuthPasswordResetConfirmationInput,
   AuthPasswordResetRequestInput,
+  AuthRefreshSessionInput,
   AuthRegisterInput,
 } from '../models';
 
@@ -30,6 +37,7 @@ export const typeDefs = gql`
   extend type Query {
     authLogin(data: AuthLoginInput!): AuthSession!
     authExchangeToken(data: AuthExchangeTokenInput): AuthSession!
+    authRefreshSession(data: AuthRefreshSessionInput): AuthSession!
     authPasswordResetRequest(data: AuthPasswordResetRequestInput!): Boolean
     accountInfo: AccountInfo!
   }
@@ -42,11 +50,13 @@ export const typeDefs = gql`
 
   type AuthSession {
     userId: String! # Change to Int! or String! respective to the typeof User['id']
-    token: String!
     roles: [String!]!
-    rememberMe: Boolean!
-    expiresIn: Int!
     rules: [Json!]!
+    rememberMe: Boolean!
+    exchangeToken: String!
+    exchangeTokenExpiresIn: Int!
+    accessToken: String!
+    accessTokenExpiresIn: Int!
   }
 
   type GoogleProfile {
@@ -92,6 +102,11 @@ export const typeDefs = gql`
     username: String!
     email: String!
     password: String!
+  }
+
+  input AuthRefreshSessionInput {
+    exchangeToken: String!
+    rememberMe: Boolean!
   }
 `;
 
@@ -153,6 +168,27 @@ export class AuthResolver {
 
   @Query()
   @UseGuards(RolesGuard())
+  async authRefreshSession(@Args('data') args: AuthRefreshSessionInput) {
+    let exchangeToken: JwtExchangePayload;
+    try {
+      exchangeToken = this.jwtService.verify(args.exchangeToken);
+    } catch {
+      throw new UnauthorizedException(ApiError.Codes.JWT_FAILED);
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: exchangeToken.sub },
+      select: { id: true, roles: true },
+    });
+
+    if (user) {
+      return this.auth.getAuthSession(user, args.rememberMe);
+    } else {
+      throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
+    }
+  }
+
+  @Query()
   async authExchangeToken(
     @CurrentUser() reqUser: RequestUser,
     @Args('data') args: AuthExchangeTokenInput
@@ -199,15 +235,15 @@ export class AuthResolver {
 
   @Mutation()
   async authPasswordResetConfirmation(@Args('data') args: AuthPasswordResetConfirmationInput) {
-    let tokenPayload: JwtPayload;
+    let passwordResetPayload: JwtPasswordResetPayload;
     try {
-      tokenPayload = this.jwtService.verify(args.token);
+      passwordResetPayload = this.jwtService.verify(args.token);
     } catch {
-      throw new UnauthorizedException(ApiError.AuthPasswordResetConfirmation.JWT_FAILED);
+      throw new UnauthorizedException(ApiError.Codes.JWT_FAILED);
     }
 
     const userExists = await this.prisma.user.findUnique({
-      where: { id: tokenPayload.sub },
+      where: { id: passwordResetPayload.sub },
       select: { id: true },
     });
     if (!userExists) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
@@ -215,7 +251,7 @@ export class AuthResolver {
     const hashedPassword = await this.auth.hashPassword(args.newPassword);
 
     const updatedUser = await this.prisma.user.update({
-      where: { id: tokenPayload.sub },
+      where: { id: passwordResetPayload.sub },
       select: { id: true, roles: true },
       data: { password: hashedPassword },
     });

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CaslFactory, JwtPayload, RequestUser } from '@zen/nest-auth';
-import { bcrypt, bcryptVerify } from 'hash-wasm';
+import { CaslFactory, JwtAccessPayload, JwtExchangePayload, RequestUser } from '@zen/nest-auth';
+import { bcrypt } from 'hash-wasm';
 
 import { ConfigService } from '../config';
 import { AuthSession } from '../graphql/models/auth-session';
@@ -19,18 +19,30 @@ export class AuthService {
   ) {}
 
   async getAuthSession(user: RequestUser, rememberMe = false): Promise<AuthSession> {
-    const jwtPayload: JwtPayload = {
-      aud: this.config.siteUrl,
+    const jwtExchangePayload: JwtExchangePayload = {
+      use: 'exchange',
+      sub: user.id,
+    };
+
+    const exchangeTokenExpiresIn = rememberMe
+      ? this.config.jwt.exchangeTokenLifetimeRememberMe
+      : this.config.jwt.exchangeTokenLifetimeDontRememberMe;
+
+    const exchangeToken = this.jwtService.sign(jwtExchangePayload, {
+      expiresIn: exchangeTokenExpiresIn,
+    });
+
+    const jwtAccessPayload: JwtAccessPayload = {
+      use: 'access',
       sub: user.id,
       roles: user.roles,
     };
 
-    /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-    const expiresIn = rememberMe
-      ? this.config.jwt.exchangeTokenLifetimeRememberMe
-      : (this.config.jwt.options.signOptions!.expiresIn as number);
+    const accessTokenExpiresIn = this.config.jwt.options.signOptions!.expiresIn as number;
 
-    const token = this.jwtService.sign(jwtPayload, { expiresIn });
+    const accessToken = this.jwtService.sign(jwtAccessPayload, {
+      expiresIn: accessTokenExpiresIn,
+    });
 
     const ability = await this.createAbility(user);
 
@@ -38,9 +50,11 @@ export class AuthService {
       userId: user.id,
       roles: user.roles,
       rules: ability.rules,
-      token,
       rememberMe,
-      expiresIn,
+      exchangeToken,
+      exchangeTokenExpiresIn,
+      accessToken,
+      accessTokenExpiresIn,
     };
   }
 
@@ -53,8 +67,8 @@ export class AuthService {
   /**
    * @returns `RequestUser` if valid and `null` otherwise
    */
-  async authorizeJwt(token: string): Promise<RequestUser | null> {
-    const jwtPayload = this.jwtService.decode(token) as JwtPayload;
+  async authorizeJwt(accessToken: string): Promise<RequestUser | null> {
+    const jwtPayload = this.jwtService.decode(accessToken) as JwtAccessPayload;
     return this.jwtStrategy.validate(jwtPayload);
   }
 

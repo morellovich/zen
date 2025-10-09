@@ -15,12 +15,14 @@ import ls from 'localstorage-slim';
 import { BehaviorSubject, Subscription, interval, map, share, throwError, timer } from 'rxjs';
 import { retry, tap } from 'rxjs/operators';
 
-import { token } from './token';
+import { accessToken, exchangeToken } from './token';
 
 export enum LocalStorageKey {
   userId = 'userId',
-  token = 'token',
-  sessionExpiresOn = 'sessionExpiresOn',
+  accessToken = 'accessToken',
+  accessTokenExpiresOn = 'accessTokenExpiresOn',
+  exchangeToken = 'exchangeToken',
+  exchangeTokenExpiresOn = 'exchangeTokenExpiresOn',
   roles = 'roles',
   rememberMe = 'rememberMe',
   rules = 'rules',
@@ -42,12 +44,12 @@ export class AuthService {
     return this.#accountInfo$;
   }
 
-  #loggedIn = !!token();
+  #loggedIn = !!exchangeToken();
   get loggedIn() {
     return this.#loggedIn;
   }
 
-  #loggedIn$ = new BehaviorSubject(!!token());
+  #loggedIn$ = new BehaviorSubject(!!exchangeToken());
   get loggedIn$() {
     return this.#loggedIn$.asObservable();
   }
@@ -80,7 +82,7 @@ export class AuthService {
       try {
         // Initialize Apollo client state
         const roles = ls.get<string[]>(LocalStorageKey.roles, { decrypt: true });
-        this.#userRoles = roles ? roles : [];
+        this.#userRoles = roles ?? [];
         this.#userRoles$.next([...this.#userRoles]);
         this.#loggedIn = roles ? true : false;
         this.#loggedIn$.next(this.#loggedIn);
