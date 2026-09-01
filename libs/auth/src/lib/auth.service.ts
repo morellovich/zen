@@ -146,7 +146,7 @@ export class AuthService {
 
     this.#userId = authSession.userId;
 
-    this.#ability.update(authSession.rules);
+    this.#ability.update(authSession.rules as any);
 
     token.set(authSession.token);
 
