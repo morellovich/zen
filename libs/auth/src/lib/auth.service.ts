@@ -4,23 +4,38 @@ import { ApolloError } from '@apollo/client/errors';
 import { PureAbility } from '@casl/ability';
 import { ApiError, Environment } from '@zen/common';
 import {
-  AuthExchangeTokenGQL,
   AuthLoginGQL,
   AuthLoginInput,
+  AuthRefreshSessionGQL,
   AuthSession,
   GetAccountInfoGQL,
 } from '@zen/graphql';
+import { setSessionRefreshHandler } from '@zen/graphql/client';
 import { Apollo } from 'apollo-angular';
 import ls from 'localstorage-slim';
-import { BehaviorSubject, Subscription, interval, map, share, throwError, timer } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  finalize,
+  firstValueFrom,
+  map,
+  share,
+  shareReplay,
+  throwError,
+  timer,
+} from 'rxjs';
 import { retry, tap } from 'rxjs/operators';
 
-import { token } from './token.signal';
+import { accessToken, exchangeToken } from './token';
 
+// eslint-disable-next-line  @typescript-eslint/no-shadow -- members intentionally mirror the token signal names
 export enum LocalStorageKey {
   userId = 'userId',
-  token = 'token',
-  sessionExpiresOn = 'sessionExpiresOn',
+  accessToken = 'accessToken',
+  accessTokenExpiresOn = 'accessTokenExpiresOn',
+  exchangeToken = 'exchangeToken',
+  exchangeTokenExpiresOn = 'exchangeTokenExpiresOn',
   roles = 'roles',
   rememberMe = 'rememberMe',
   rules = 'rules',
@@ -30,7 +45,8 @@ export enum LocalStorageKey {
   providedIn: 'root',
 })
 export class AuthService {
-  #exchangeIntervalSubscription?: Subscription;
+  #refreshSubscription?: Subscription;
+  #inFlightRefresh?: Observable<AuthSession>;
 
   #userId: AuthSession['userId'] | null = null;
   get userId(): AuthSession['userId'] | null {
@@ -42,12 +58,12 @@ export class AuthService {
     return this.#accountInfo$;
   }
 
-  #loggedIn = !!token();
+  #loggedIn = !!exchangeToken();
   get loggedIn() {
     return this.#loggedIn;
   }
 
-  #loggedIn$ = new BehaviorSubject(!!token());
+  #loggedIn$ = new BehaviorSubject(!!exchangeToken());
   get loggedIn$() {
     return this.#loggedIn$.asObservable();
   }
@@ -67,10 +83,14 @@ export class AuthService {
   #apollo = inject(Apollo);
   #ability = inject(PureAbility);
   #authLoginGQL = inject(AuthLoginGQL);
-  #authExchangeTokenGQL = inject(AuthExchangeTokenGQL);
+  #authRefreshSessionGQL = inject(AuthRefreshSessionGQL);
   #env = inject(Environment);
 
   constructor() {
+    // Lets the Apollo error link recover from an expired access token without
+    // `@zen/graphql` having to depend on this library
+    setSessionRefreshHandler(() => firstValueFrom(this.refreshSession()));
+
     this.#accountInfo$ = this.#getAccountInfoGQL.watch().valueChanges.pipe(
       map(({ data }) => data.accountInfo),
       share()
@@ -90,26 +110,14 @@ export class AuthService {
         const rules: Array<any> | null = ls.get(LocalStorageKey.rules, { decrypt: true });
         if (Array.isArray(rules)) this.#ability.update(rules);
 
-        switch (this.#env.auth.exchangeStrategy) {
-          case 'app-load':
-            this.#exchangeToken();
-            break;
-          case 'efficient':
-            if (
-              !this.#rememberMe &&
-              this.#sessionTimeRemaining <= this.#env.auth.jwtExchangeInterval
-            ) {
-              this.#exchangeToken();
-            } else if (
-              this.#rememberMe &&
-              this.#sessionTimeRemaining <= this.#env.auth.rememberMeExchangeThreshold
-            ) {
-              this.#exchangeToken();
-            }
-            break;
-        }
-
-        this.#startExchangeInterval();
+        // The stored access token is usually stale by the time the app reloads,
+        // so always start from a fresh pair
+        this.refreshSession().subscribe({
+          error: (error: ApolloError | string) => {
+            console.error('Session refresh failed on app load', error);
+            this.logout();
+          },
+        });
       } catch (error) {
         console.error('AuthService failed to initialize', error);
         this.logout();
@@ -138,8 +146,13 @@ export class AuthService {
 
   setSession(authSession: AuthSession) {
     ls.set(LocalStorageKey.userId, authSession.userId, { encrypt: true });
-    ls.set(LocalStorageKey.token, authSession.token, { encrypt: true });
-    ls.set(LocalStorageKey.sessionExpiresOn, Date.now() + authSession.expiresIn * 1000);
+    ls.set(LocalStorageKey.accessToken, authSession.accessToken, { encrypt: true });
+    ls.set(LocalStorageKey.accessTokenExpiresOn, Date.now() + authSession.accessTokenExpiresIn * 1000);
+    ls.set(LocalStorageKey.exchangeToken, authSession.exchangeToken, { encrypt: true });
+    ls.set(
+      LocalStorageKey.exchangeTokenExpiresOn,
+      Date.now() + authSession.exchangeTokenExpiresIn * 1000
+    );
     ls.set(LocalStorageKey.rememberMe, authSession.rememberMe);
     ls.set(LocalStorageKey.roles, authSession.roles, { encrypt: true });
     ls.set(LocalStorageKey.rules, authSession.rules, { encrypt: true });
@@ -148,7 +161,8 @@ export class AuthService {
 
     this.#ability.update(authSession.rules as any);
 
-    token.set(authSession.token);
+    accessToken.set(authSession.accessToken);
+    exchangeToken.set(authSession.exchangeToken);
 
     if (
       !this.rolesEqual(this.#userRoles, authSession.roles) ||
@@ -164,7 +178,7 @@ export class AuthService {
       this.#loggedIn$.next(true);
     }
 
-    this.#startExchangeInterval();
+    this.#scheduleRefresh(authSession.accessTokenExpiresIn);
   }
 
   rolesEqual(a: string | string[] | null | undefined, b: string | string[] | null | undefined) {
@@ -209,16 +223,16 @@ export class AuthService {
     return true;
   }
 
-  get #rememberMe() {
-    return ls.get<boolean>(LocalStorageKey.rememberMe);
-  }
-
+  /**
+   * A session lives as long as its exchange token: the access token expiring is
+   * routine and simply triggers a refresh.
+   */
   get #validSession(): boolean {
     return this.#sessionTimeRemaining > 0;
   }
 
   get #sessionTimeRemaining(): number {
-    const expiresOn = ls.get<number>(LocalStorageKey.sessionExpiresOn);
+    const expiresOn = ls.get<number>(LocalStorageKey.exchangeTokenExpiresOn);
     if (!expiresOn) return 0;
 
     const timeRemaining = expiresOn - Date.now();
@@ -228,17 +242,20 @@ export class AuthService {
   }
 
   clearSession() {
-    this.#stopExchangeInterval();
+    this.#stopRefreshTimer();
     ls.remove(LocalStorageKey.userId);
-    ls.remove(LocalStorageKey.token);
-    ls.remove(LocalStorageKey.sessionExpiresOn);
+    ls.remove(LocalStorageKey.accessToken);
+    ls.remove(LocalStorageKey.accessTokenExpiresOn);
+    ls.remove(LocalStorageKey.exchangeToken);
+    ls.remove(LocalStorageKey.exchangeTokenExpiresOn);
     ls.remove(LocalStorageKey.rememberMe);
     ls.remove(LocalStorageKey.roles);
     ls.remove(LocalStorageKey.rules);
 
     this.#userId = null;
     this.#ability.update([]);
-    token.set(null);
+    accessToken.set(null);
+    exchangeToken.set(null);
     this.#userRoles = [];
     this.#userRoles$.next([]);
     this.#loggedIn = false;
@@ -246,47 +263,80 @@ export class AuthService {
     void this.#apollo.client.cache.reset();
   }
 
-  #exchangeToken() {
-    this.#authExchangeTokenGQL
+  /**
+   * Trades the stored exchange token for a fresh session.
+   *
+   * Concurrent callers share one in-flight request: a burst of requests all
+   * failing on the same expired access token must produce a single refresh, not
+   * one per request.
+   */
+  refreshSession(): Observable<AuthSession> {
+    if (this.#inFlightRefresh) return this.#inFlightRefresh;
+
+    const storedExchangeToken = exchangeToken();
+
+    if (!storedExchangeToken) {
+      return throwError(() => new Error('No exchange token available'));
+    }
+
+    this.#inFlightRefresh = this.#authRefreshSessionGQL
       .fetch(
-        { data: { rememberMe: !!ls.get<boolean>(LocalStorageKey.rememberMe) } },
+        {
+          data: {
+            exchangeToken: storedExchangeToken,
+            rememberMe: !!ls.get<boolean>(LocalStorageKey.rememberMe),
+          },
+        },
         { fetchPolicy: 'no-cache' }
       )
       .pipe(
         retry({
           delay: this.#retryStrategy({
             excludeStatusCodes: ['FORBIDDEN', 'UNAUTHENTICATED', 'INTERNAL_SERVER_ERROR'],
-            delay: this.#env.auth.retryExchangeTokenDelay,
+            delay: this.#env.auth.retryRefreshSessionDelay,
           }),
-        })
-      )
-      .subscribe({
-        next: ({ data: { authExchangeToken } }) => {
-          this.setSession(authExchangeToken);
-          if (!this.#env.production) console.log('Exchanged token');
-        },
+        }),
+        map(({ data: { authRefreshSession } }) => {
+          this.setSession(authRefreshSession);
+          if (!this.#env.production) console.log('Refreshed session');
+          return authRefreshSession;
+        }),
+        finalize(() => (this.#inFlightRefresh = undefined)),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+
+    return this.#inFlightRefresh;
+  }
+
+  /**
+   * Proactively refreshes shortly before the access token expires.  The delay
+   * comes from the server's own `accessTokenExpiresIn`, so client and API
+   * timings can never drift apart.
+   */
+  #scheduleRefresh(accessTokenExpiresIn: number) {
+    this.#stopRefreshTimer();
+
+    const delay = Math.max(accessTokenExpiresIn * 1000 - this.#env.auth.refreshSkew, 5000);
+
+    this.#refreshSubscription = timer(delay).subscribe(() => {
+      if (!this.#validSession) {
+        this.logout();
+        return;
+      }
+
+      this.refreshSession().subscribe({
         error: (error: ApolloError | string) => {
-          console.error('Exchange token failed', error);
+          console.error('Scheduled session refresh failed', error);
           this.logout();
         },
       });
+    });
   }
 
-  #startExchangeInterval() {
-    if (!this.#rememberMe && !this.#exchangeIntervalSubscription) {
-      this.#exchangeIntervalSubscription = interval(this.#env.auth.jwtExchangeInterval).subscribe(
-        () => {
-          if (this.#validSession) this.#exchangeToken();
-          else this.logout();
-        }
-      );
-    }
-  }
-
-  #stopExchangeInterval() {
-    if (this.#exchangeIntervalSubscription) {
-      this.#exchangeIntervalSubscription.unsubscribe();
-      this.#exchangeIntervalSubscription = undefined;
+  #stopRefreshTimer() {
+    if (this.#refreshSubscription) {
+      this.#refreshSubscription.unsubscribe();
+      this.#refreshSubscription = undefined;
     }
   }
 
@@ -311,7 +361,7 @@ export class AuthService {
       }
 
       console.warn(
-        `Exchange token attempt ${retryCount}. Retrying in ${Math.round(delay / 1000)}s`,
+        `Session refresh attempt ${retryCount}. Retrying in ${Math.round(delay / 1000)}s`,
         error
       );
 

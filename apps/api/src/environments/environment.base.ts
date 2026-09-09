@@ -25,9 +25,24 @@ export abstract class EnvironmentBase {
     readonly csrfPrevention?: boolean;
     readonly uploads?: Parameters<typeof processRequest>[2];
   };
+  /**
+   * Allows public registration.  When false, requests to the `authRegister`
+   * mutation are denied.
+   */
   readonly publicRegistration: boolean;
-  readonly jwtOptions: JwtModuleOptions;
-  readonly expiresInRememberMe: number;
+  readonly jwt: {
+    /** Exchange token lifetime, in seconds, when the user opted into `rememberMe` */
+    readonly exchangeTokenLifetimeRememberMe: number;
+    /** Exchange token lifetime, in seconds, when the user did not opt into `rememberMe` */
+    readonly exchangeTokenLifetimeDontRememberMe: number;
+    /**
+     * Signing options shared by every token type.  `signOptions.expiresIn` is
+     * the access token lifetime.
+     *
+     * [Docs for options](https://www.passportjs.org/packages/passport-jwt/)
+     */
+    readonly options: JwtModuleOptions;
+  };
   readonly mail: Omit<MailerOptions, 'template'>;
   readonly throttle: ThrottlerModuleOptions;
   /** We are utilizing [hash-wasm](https://github.com/Daninet/hash-wasm) for our implementation of bcrypt */

@@ -63,11 +63,13 @@ describe('ZenRegisterFormComponent', () => {
       authRegister: {
         __typename: 'AuthSession',
         userId: 'abc123',
-        expiresIn: 1000,
         rememberMe: true,
         roles: ['Super'],
-        token: '1234',
         rules: [{ action: 'manage', subject: 'all' }],
+        exchangeToken: 'exchange.1234',
+        exchangeTokenExpiresIn: 100000,
+        accessToken: 'access.1234',
+        accessTokenExpiresIn: 1000,
       },
     };
 

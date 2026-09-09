@@ -3,33 +3,21 @@ export abstract class Environment {
   abstract readonly publicRegistration: boolean;
   abstract readonly auth: {
     /**
-     * `app-load` will exchange the auth token for a fresh token every time the app loads.
-     *
-     * `efficient` will exchange the auth token only when intervals are exceeded.
+     * How long in milliseconds before the access token expires the client
+     * refreshes it.  The refresh schedule is derived from the
+     * `accessTokenExpiresIn` the server returns, so this is the only timing
+     * value the client needs and it never has to be kept in sync with the API.
+     * @example 60 * 1000 is 1 minute
      */
-    readonly exchangeStrategy: 'app-load' | 'efficient';
+    readonly refreshSkew: number;
 
     /**
-     * The rate in milliseconds at which the client will exchange the JWT when the user's session has `rememberMe = false`.
-     * This should be less than the JWT expiration time.
-     * @see `apps/api/src/environments/environment.ts` for `Environment.jwtOptions.signOptions.expiresIn`
-     * @example 30 * 60 * 1000 is 30 minutes
-     */
-    readonly jwtExchangeInterval: number;
-
-    /**
-     * The threshold in milliseconds at which the client will exchange the JWT when the user's session time is less than this value.
-     * If the user's session has `rememberMe = true` and the user's session time remaining is less than 45 days, the client will exchange the JWT.
-     * @example 45 * 24 * 60 * 60 * 1000 is 45 days.
-     */
-    readonly rememberMeExchangeThreshold: number;
-
-    /**
-     * The delay in milliseconds at which the client will retry on a failed JWT exchange.
-     * For example if the client is disconnected and has their auth session expiring soon, it will retry at the provided interval.
+     * The delay in milliseconds at which the client will retry a failed session
+     * refresh.  For example if the client is disconnected and has their auth
+     * session expiring soon, it will retry at the provided interval.
      * @example 5000 is 5 seconds.
      */
-    readonly retryExchangeTokenDelay?: number;
+    readonly retryRefreshSessionDelay?: number;
   };
 
   /**
@@ -55,10 +43,8 @@ export class EnvironmentDev implements Environment {
   production = false;
   publicRegistration = true;
   auth = {
-    exchangeStrategy: 'app-load',
-    jwtExchangeInterval: 30 * 60 * 1000, // 30 minutes
-    rememberMeExchangeThreshold: 45 * 24 * 60 * 60 * 1000, // 45 days
-    retryExchangeTokenDelay: 5000, // 5 seconds
+    refreshSkew: 60 * 1000, // 1 minute
+    retryRefreshSessionDelay: 5000, // 5 seconds
   } as const;
   enableGoogleOAuth = true;
   url = {
@@ -75,10 +61,8 @@ export class EnvironmentProd implements Environment {
   production = true;
   publicRegistration = true;
   auth = {
-    exchangeStrategy: 'app-load',
-    jwtExchangeInterval: 30 * 60 * 1000, // 30 minutes
-    rememberMeExchangeThreshold: 45 * 24 * 60 * 60 * 1000, // 45 days
-    retryExchangeTokenDelay: 5000, // 5 seconds
+    refreshSkew: 60 * 1000, // 1 minute
+    retryRefreshSessionDelay: 5000, // 5 seconds
   } as const;
   enableGoogleOAuth = true;
   url = {

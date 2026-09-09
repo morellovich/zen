@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigService } from '../config';
-import { AuthSession } from '../graphql/models';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -15,13 +14,7 @@ describe('Auth Controller', () => {
         {
           provide: AuthService,
           useValue: {
-            getAuthSession: () => {
-              const authSession: Pick<AuthSession, 'token'> = {
-                token: 'abc.def_+/ghi.jkl==',
-              };
-
-              return Promise.resolve(authSession);
-            },
+            signExchangeToken: () => 'abc.def_+/ghi.jkl==',
           },
         },
         {
@@ -38,7 +31,7 @@ describe('Auth Controller', () => {
 
   it('constructs a valid query string from an AuthSession', async () => {
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    const url = await controller.getLoginConfirmedURL(undefined as any);
+    const url = await controller.getLoginConfirmedURL({ id: 'user-1', roles: [] } as any);
     expect(url).toEqual(
       'http://site.com/login-confirmed?token=abc.def_%252B%252Fghi.jkl%253D%253D'
     );

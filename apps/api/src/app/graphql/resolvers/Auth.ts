@@ -1,12 +1,16 @@
-import crypto from 'crypto';
-
 import { HttpException, Logger, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Throttle } from '@nestjs/throttler';
 import { ApiError } from '@zen/common';
-import { CurrentUser, JwtPayload, RequestUser, RolesGuard } from '@zen/nest-auth';
+import {
+  CurrentUser,
+  JwtExchangePayload,
+  JwtPasswordResetPayload,
+  RequestUser,
+  RolesGuard,
+} from '@zen/nest-auth';
 import gql from 'graphql-tag';
-import { bcrypt, bcryptVerify } from 'hash-wasm';
+import { bcryptVerify } from 'hash-wasm';
 
 import { AuthService } from '../../auth';
 import { ConfigService } from '../../config';
@@ -21,6 +25,7 @@ import {
   AuthPasswordChangeInput,
   AuthPasswordResetConfirmationInput,
   AuthPasswordResetRequestInput,
+  AuthRefreshSessionInput,
   AuthRegisterInput,
 } from '../models';
 
@@ -30,6 +35,7 @@ export const typeDefs = gql`
   extend type Query {
     authLogin(data: AuthLoginInput!): AuthSession!
     authExchangeToken(data: AuthExchangeTokenInput): AuthSession!
+    authRefreshSession(data: AuthRefreshSessionInput!): AuthSession!
     authPasswordResetRequest(data: AuthPasswordResetRequestInput!): Boolean
     accountInfo: AccountInfo!
   }
@@ -42,11 +48,13 @@ export const typeDefs = gql`
 
   type AuthSession {
     userId: String! # Change to Int! or String! respective to the typeof User['id']
-    token: String!
     roles: [String!]!
-    rememberMe: Boolean!
-    expiresIn: Int!
     rules: [Json!]!
+    rememberMe: Boolean!
+    exchangeToken: String!
+    exchangeTokenExpiresIn: Int!
+    accessToken: String!
+    accessTokenExpiresIn: Int!
   }
 
   type GoogleProfile {
@@ -71,6 +79,11 @@ export const typeDefs = gql`
   }
 
   input AuthExchangeTokenInput {
+    rememberMe: Boolean!
+  }
+
+  input AuthRefreshSessionInput {
+    exchangeToken: String!
     rememberMe: Boolean!
   }
 
@@ -151,6 +164,26 @@ export class AuthResolver {
     } satisfies AccountInfo;
   }
 
+  /**
+   * Trades a valid exchange token for a fresh session.  Deliberately not behind
+   * `RolesGuard`: it is called precisely when the access token has expired, so
+   * requiring one would make refreshing impossible.  The exchange token itself
+   * is the credential and is verified below.
+   */
+  @Query()
+  async authRefreshSession(@Args('data') args: AuthRefreshSessionInput) {
+    const payload = await this.auth.verifyJwt<JwtExchangePayload>(args.exchangeToken, 'exchange');
+    if (!payload) throw new UnauthorizedException(ApiError.Codes.JWT_FAILED);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { id: true, roles: true },
+    });
+    if (!user) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
+
+    return this.auth.getAuthSession(user, args.rememberMe);
+  }
+
   @Query()
   @UseGuards(RolesGuard())
   async authExchangeToken(
@@ -199,23 +232,22 @@ export class AuthResolver {
 
   @Mutation()
   async authPasswordResetConfirmation(@Args('data') args: AuthPasswordResetConfirmationInput) {
-    let tokenPayload: JwtPayload;
-    try {
-      tokenPayload = this.jwtService.verify(args.token);
-    } catch {
-      throw new UnauthorizedException(ApiError.AuthPasswordResetConfirmation.JWT_FAILED);
-    }
+    const payload = await this.auth.verifyJwt<JwtPasswordResetPayload>(
+      args.token,
+      'password reset'
+    );
+    if (!payload) throw new UnauthorizedException(ApiError.Codes.JWT_FAILED);
 
     const userExists = await this.prisma.user.findUnique({
-      where: { id: tokenPayload.sub },
+      where: { id: payload.sub },
       select: { id: true },
     });
     if (!userExists) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
 
-    const hashedPassword = await this.hashPassword(args.newPassword);
+    const hashedPassword = await this.auth.hashPassword(args.newPassword);
 
     const updatedUser = await this.prisma.user.update({
-      where: { id: tokenPayload.sub },
+      where: { id: payload.sub },
       select: { id: true, roles: true },
       data: { password: hashedPassword },
     });
@@ -240,7 +272,7 @@ export class AuthResolver {
     });
     if (emailTaken) throw new HttpException(ApiError.AuthRegister.EMAIL_TAKEN, 400);
 
-    const hashedPassword = await this.hashPassword(args.password);
+    const hashedPassword = await this.auth.hashPassword(args.password);
 
     const user = await this.prisma.user.create({
       data: {
@@ -295,31 +327,22 @@ export class AuthResolver {
     });
 
     if (!user) throw new UnauthorizedException(ApiError.Codes.USER_NOT_FOUND);
+    // An account created purely through an OIDC provider has no password to change
+    if (!user.password)
+      throw new UnauthorizedException(ApiError.AuthPasswordChange.NO_PASSWORD_WHEN_EXPECTED);
 
     const correctPassword = await bcryptVerify({
       password: args.oldPassword,
-      hash: user.password as string,
+      hash: user.password,
     });
     if (!correctPassword) throw new HttpException(ApiError.AuthPasswordChange.WRONG_PASSWORD, 400);
 
-    const hashedPassword = await this.hashPassword(args.newPassword);
+    const hashedPassword = await this.auth.hashPassword(args.newPassword);
 
     await this.prisma.user.update({
       where: { id: user.id },
       data: { password: hashedPassword },
       select: { id: true },
-    });
-  }
-
-  private async hashPassword(password: string) {
-    return bcrypt({
-      // @default 12 bytes
-      costFactor: this.config.bcrypt?.costFactor ?? 12,
-      password,
-      salt: crypto.getRandomValues(
-        // @default 16 bytes
-        new Uint8Array(this.config.bcrypt?.saltSize ?? 16)
-      ),
     });
   }
 }

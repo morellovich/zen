@@ -9,7 +9,7 @@ import {
 } from '@angular/router';
 import { PureAbility } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
-import { authInterceptorFn, token } from '@zen/auth';
+import { accessToken, authInterceptorFn } from '@zen/auth';
 import { Environment } from '@zen/common';
 import { ZenGraphQLModule } from '@zen/graphql';
 import { possibleTypes, typePolicies } from '@zen/graphql/client';
@@ -46,13 +46,13 @@ export const appConfig: ApplicationConfig = {
           headers: { 'Apollo-Require-Preflight': 'true' },
           // eslint-disable-next-line  @typescript-eslint/no-explicit-any
           fetch: (input, init: any) => {
-            init.headers['Authorization'] = 'Bearer ' + token();
+            init.headers['Authorization'] = 'Bearer ' + accessToken();
             return fetch(input, init);
           },
         },
         websocketOptions: {
           url: environment.url.graphqlSubscriptions,
-          connectionParams: () => ({ token: token() }),
+          connectionParams: () => ({ token: accessToken() }),
           shouldRetry: () => true,
           retryAttempts: Infinity,
         },

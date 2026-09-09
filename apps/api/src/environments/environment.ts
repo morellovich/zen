@@ -27,23 +27,27 @@ export const environment: EnvironmentBase = {
       maxFiles: 5,
     },
   },
-  jwtOptions: {
-    secret: process.env.JWT_PRIVATE_KEY,
-    signOptions: {
-      algorithm: 'HS256',
-      /**
-       * The client will exchange the token every 30 minutes during active sessions
-       * @see `libs\common\src\lib\environment` for `EnvironmentDev.jwtExchangeInterval`
-       */
-      expiresIn: 3600, // 1 hour (in seconds)
+  jwt: {
+    exchangeTokenLifetimeRememberMe: 7_776_000, // 90 days (in seconds)
+    exchangeTokenLifetimeDontRememberMe: 86_400, // 1 day (in seconds)
+    options: {
+      secret: process.env.JWT_PRIVATE_KEY,
+      signOptions: {
+        algorithm: 'HS256',
+        /**
+         * Access token lifetime.  The client refreshes ahead of this and also
+         * reactively when a request is rejected for an expired token.
+         * @see `libs\common\src\lib\environment` for `EnvironmentDev.jwtExchangeInterval`
+         */
+        expiresIn: 900, // 15 minutes (in seconds)
+      },
     },
   },
-  expiresInRememberMe: 7_776_000, // 90 days (in seconds)
   mail: {
     // Docs: https://nodemailer.com/smtp/
     transport: {
       host: process.env.SMTP_SERVER,
-      port: 587,
+      port: Number(process.env.SMTP_PORT) || 587,
       secure: false, // true for port 465, false for other ports
       auth: {
         user: process.env.SMTP_LOGIN,

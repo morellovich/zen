@@ -4,17 +4,17 @@ import { PureAbility } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
 import { Environment, EnvironmentDev } from '@zen/common';
 import {
-  AuthExchangeTokenGQL,
   AuthLogin,
   AuthLoginDocument,
   AuthLoginGQL,
+  AuthRefreshSessionGQL,
   GetAccountInfoGQL,
 } from '@zen/graphql';
 import { ApolloTestingController, ApolloTestingModule } from 'apollo-angular/testing';
 import ls from 'localstorage-slim';
 
 import { AuthService, LocalStorageKey } from './auth.service';
-import { token } from './token.signal';
+import { accessToken, exchangeToken } from './token';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -29,9 +29,9 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         AuthLoginGQL,
-        AuthExchangeTokenGQL,
+        AuthRefreshSessionGQL,
         GetAccountInfoGQL,
-        { provide: Environment, useValue: EnvironmentDev },
+        { provide: Environment, useClass: EnvironmentDev },
         {
           provide: PureAbility,
           useValue: createPrismaAbility(undefined, {
@@ -75,11 +75,13 @@ describe('AuthService', () => {
       authLogin: {
         __typename: 'AuthSession',
         userId: '',
-        expiresIn: 0,
         rememberMe: true,
         roles: ['Editor'],
-        token: '',
         rules: [],
+        exchangeToken: '',
+        exchangeTokenExpiresIn: 0,
+        accessToken: '',
+        accessTokenExpiresIn: 0,
       },
     };
 
@@ -111,11 +113,13 @@ describe('AuthService', () => {
       authLogin: {
         __typename: 'AuthSession',
         userId: '',
-        expiresIn: 0,
         rememberMe: true,
         roles: ['Editor'],
-        token: '',
         rules: [],
+        exchangeToken: '',
+        exchangeTokenExpiresIn: 0,
+        accessToken: '',
+        accessTokenExpiresIn: 0,
       },
     };
 
@@ -147,11 +151,13 @@ describe('AuthService', () => {
       authLogin: {
         __typename: 'AuthSession',
         userId: 'abc123',
-        expiresIn: 1000,
         rememberMe: true,
         roles: ['Super'],
-        token: 'abc.def.ghi',
         rules: [{ action: 'manage', subject: 'all' }],
+        exchangeToken: 'exchange.def.ghi',
+        exchangeTokenExpiresIn: 100000,
+        accessToken: 'access.def.ghi',
+        accessTokenExpiresIn: 1000,
       },
     };
 
@@ -165,15 +171,22 @@ describe('AuthService', () => {
         expect(authLogin.data).toEqual(data);
 
         expect(ls.get(LocalStorageKey.userId, { decrypt: true })).toEqual(data.authLogin.userId);
-        expect(ls.get(LocalStorageKey.token, { decrypt: true })).toEqual(data.authLogin.token);
-        expect(typeof ls.get(LocalStorageKey.sessionExpiresOn)).toEqual('number');
+        expect(ls.get(LocalStorageKey.accessToken, { decrypt: true })).toEqual(
+          data.authLogin.accessToken
+        );
+        expect(ls.get(LocalStorageKey.exchangeToken, { decrypt: true })).toEqual(
+          data.authLogin.exchangeToken
+        );
+        expect(typeof ls.get(LocalStorageKey.accessTokenExpiresOn)).toEqual('number');
+        expect(typeof ls.get(LocalStorageKey.exchangeTokenExpiresOn)).toEqual('number');
         expect(ls.get(LocalStorageKey.rememberMe)).toEqual(data.authLogin.rememberMe);
         expect(ls.get(LocalStorageKey.roles, { decrypt: true })).toEqual(data.authLogin.roles);
         expect(ls.get(LocalStorageKey.rules, { decrypt: true })).toEqual(data.authLogin.rules);
 
         expect(ability.rules).toEqual(data.authLogin.rules);
         expect(service.userId).toEqual(data.authLogin.userId);
-        expect(token()).toEqual(data.authLogin.token);
+        expect(accessToken()).toEqual(data.authLogin.accessToken);
+        expect(exchangeToken()).toEqual(data.authLogin.exchangeToken);
         expect(service.userRoles).toEqual(data.authLogin.roles);
         expect(service.loggedIn).toEqual(true);
 
@@ -182,15 +195,18 @@ describe('AuthService', () => {
         service.logout();
 
         expect(ls.get(LocalStorageKey.userId, { decrypt: true })).toEqual(null);
-        expect(ls.get(LocalStorageKey.token, { decrypt: true })).toEqual(null);
-        expect(ls.get(LocalStorageKey.sessionExpiresOn)).toEqual(null);
+        expect(ls.get(LocalStorageKey.accessToken, { decrypt: true })).toEqual(null);
+        expect(ls.get(LocalStorageKey.accessTokenExpiresOn)).toEqual(null);
+        expect(ls.get(LocalStorageKey.exchangeToken, { decrypt: true })).toEqual(null);
+        expect(ls.get(LocalStorageKey.exchangeTokenExpiresOn)).toEqual(null);
         expect(ls.get(LocalStorageKey.rememberMe)).toEqual(null);
         expect(ls.get(LocalStorageKey.roles, { decrypt: true })).toEqual(null);
         expect(ls.get(LocalStorageKey.rules, { decrypt: true })).toEqual(null);
 
         expect(ability.rules).toEqual([]);
         expect(service.userId).toEqual(null);
-        expect(token()).toEqual(null);
+        expect(accessToken()).toEqual(null);
+        expect(exchangeToken()).toEqual(null);
         expect(service.userRoles).toEqual([]);
         expect(service.loggedIn).toEqual(false);
 

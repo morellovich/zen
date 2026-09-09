@@ -4,7 +4,7 @@ export * from './lib/auth.service';
 export * from './lib/directives';
 export * from './lib/guards';
 export * from './lib/inputs';
-export * from './lib/token.signal';
+export * from './lib/token';
 export * from './lib/validators';
 export * from './lib/zen-account-info/zen-account-info.component';
 export * from './lib/zen-auth.routes';

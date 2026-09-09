@@ -7,5 +7,5 @@ export * from './lib/decorators/casl-ability.decorator';
 export * from './lib/decorators/casl-accessible.decorator';
 export * from './lib/decorators/current-user.decorator';
 export * from './lib/guards/casl.guard';
-export * from './lib/models/jwt-payload';
+export * from './lib/models/jwt-payloads';
 export * from './lib/nest-auth.module';

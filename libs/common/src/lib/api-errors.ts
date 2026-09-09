@@ -1,14 +1,11 @@
 export enum Codes {
   USER_NOT_FOUND = 'User not found',
   THROTTLE = 'ThrottlerException: Too Many Requests',
+  JWT_FAILED = 'JWT failed verification',
 }
 
 export enum AuthLogin {
   INCORRECT_PASSWORD = 'Incorrect password',
-}
-
-export enum AuthPasswordResetConfirmation {
-  JWT_FAILED = 'JWT failed verification',
 }
 
 export enum AuthRegister {
@@ -18,6 +15,7 @@ export enum AuthRegister {
 
 export enum AuthPasswordChange {
   WRONG_PASSWORD = 'Wrong password',
+  NO_PASSWORD_WHEN_EXPECTED = 'No password for account when expected',
 }
 
 export enum JwtErrors {

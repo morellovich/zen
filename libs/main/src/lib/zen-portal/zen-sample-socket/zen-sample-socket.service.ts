@@ -1,5 +1,5 @@
 import { ApplicationRef, Injectable, inject } from '@angular/core';
-import { token } from '@zen/auth';
+import { accessToken } from '@zen/auth';
 import { Environment } from '@zen/common';
 import { Socket, SocketIoConfig } from 'ngx-socket-io';
 
@@ -13,7 +13,7 @@ export class ZenSampleSocketService extends Socket {
         options: {
           // `auth` is forwarded verbatim to socket.io-client and survives the
           // websocket transport upgrade, unlike `extraHeaders`
-          auth: { token: token() },
+          auth: { token: accessToken() },
         },
       } as SocketIoConfig,
       inject(ApplicationRef)

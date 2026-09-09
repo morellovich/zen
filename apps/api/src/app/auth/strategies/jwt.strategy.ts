@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ApiError } from '@zen/common';
-import { JwtPayload, RequestUser } from '@zen/nest-auth';
+import { JwtAccessPayload, RequestUser } from '@zen/nest-auth';
 import { FastifyRequest } from 'fastify';
 import { Strategy } from 'passport-jwt';
 
@@ -12,9 +12,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly config: ConfigService) {
     super({
       /** @see [passport-jwt docs](http://www.passportjs.org/packages/passport-jwt/) */
-      secretOrKey: config.jwtOptions.publicKey
-        ? (config.jwtOptions.publicKey as string)
-        : (config.jwtOptions.secret as string),
+      secretOrKey: config.jwt.options.publicKey
+        ? (config.jwt.options.publicKey as string)
+        : (config.jwt.options.secret as string),
 
       jwtFromRequest: (req: (FastifyRequest | { token?: string; headers?: Record<string, string | string[] | undefined> })) => {
         // Websocket connection
@@ -33,9 +33,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<RequestUser | null> {
+  async validate(payload: JwtAccessPayload): Promise<RequestUser | null> {
+    // Only an access token authorizes a request; an exchange or password reset
+    // token must never be accepted here
+    if (!payload || payload.use !== 'access') return null;
     // Validate the audience as the site URL
-    if (!payload || payload.aud !== this.config.siteUrl) return null;
+    if (payload.aud !== this.config.siteUrl) return null;
 
     return {
       id: payload.sub,

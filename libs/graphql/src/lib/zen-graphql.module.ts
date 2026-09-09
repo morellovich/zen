@@ -7,8 +7,10 @@ import {
   InMemoryCache,
   InMemoryCacheConfig,
   NormalizedCacheObject,
+  fromPromise,
   split,
 } from '@apollo/client/core';
+import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition, getOperationName } from '@apollo/client/utilities';
 import { provideApollo } from 'apollo-angular';
@@ -16,6 +18,8 @@ import { BatchOptions, HttpBatchLink, HttpBatchLinkHandler } from 'apollo-angula
 import { createUploadLink } from 'apollo-upload-client';
 import { OperationDefinitionNode } from 'graphql';
 import { ClientOptions, createClient } from 'graphql-ws';
+
+import { NO_REFRESH_OPERATIONS, getSessionRefreshHandler } from './client/session-refresh';
 
 export abstract class GraphQLOptions {
   resolvers?: ApolloClientOptions<NormalizedCacheObject>['resolvers'];
@@ -111,8 +115,41 @@ export function createApollo(): ApolloClientOptions<NormalizedCacheObject> {
   }
 
   return {
-    link,
+    link: ApolloLink.from([createSessionRefreshLink(), link]),
     cache: new InMemoryCache(options.cacheOptions),
     resolvers: options.resolvers,
   };
+}
+
+/**
+ * Recovers from an expired access token: refreshes the session once, then
+ * replays the failed operation.  The proactive timer in `AuthService` normally
+ * gets there first; this covers the cases it cannot, such as the machine
+ * waking from sleep with a token that expired while suspended.
+ */
+function createSessionRefreshLink() {
+  return onError(({ graphQLErrors, operation, forward }) => {
+    if (!graphQLErrors?.length) return;
+
+    const unauthenticated = graphQLErrors.some(
+      error => error.extensions?.['code'] === 'UNAUTHENTICATED'
+    );
+    if (!unauthenticated) return;
+
+    // Never refresh in response to the refresh call itself, or the failure
+    // would recurse
+    if (NO_REFRESH_OPERATIONS.includes(operation.operationName)) return;
+
+    // Only ever retry once per operation
+    const context = operation.getContext();
+    if (context['sessionRefreshAttempted']) return;
+    operation.setContext({ ...context, sessionRefreshAttempted: true });
+
+    const refresh = getSessionRefreshHandler();
+    if (!refresh) return;
+
+    return fromPromise(refresh().catch(() => null)).flatMap(result =>
+      result === null ? ApolloLink.empty().request(operation)! : forward(operation)
+    );
+  });
 }

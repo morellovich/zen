@@ -2,7 +2,7 @@ import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/h
 import { inject } from '@angular/core';
 import { Environment } from '@zen/common';
 
-import { token } from './token.signal';
+import { accessToken } from './token';
 
 export const authInterceptorFn: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
@@ -20,10 +20,10 @@ export const authInterceptorFn: HttpInterceptorFn = (
   const apiHost = new URL(env.url.api).host;
   const gqlHost = new URL(env.url.graphql).host;
 
-  if (token() && (reqHost === apiHost || reqHost === gqlHost)) {
+  if (accessToken() && (reqHost === apiHost || reqHost === gqlHost)) {
     const modifiedReq = req.clone({
       setHeaders: {
-        Authorization: 'Bearer ' + token(),
+        Authorization: 'Bearer ' + accessToken(),
       },
     });
 

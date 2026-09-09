@@ -31,8 +31,11 @@ export class AuthController {
   }
 
   async getLoginConfirmedURL(user: RequestUser) {
-    const authSession = await this.auth.getAuthSession(user, false);
-    const token = encodeURIComponent(authSession.token);
+    // A short lived exchange token, immediately traded for a session by the
+    // portal.  It carries no roles, so exposing it in a redirect URL grants
+    // nothing on its own.
+    const exchangeToken = this.auth.signExchangeToken(user.id, 3 * 60); // 3 minutes
+    const token = encodeURIComponent(exchangeToken);
     const queryParams = new URLSearchParams({ token });
     // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
     return this.config.oauth!.loginConfirmedURL + '?' + queryParams;
