@@ -28,28 +28,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-edit.mts\"",
-            "timeout": 60
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/dead-exports.mts\"",
-            "timeout": 20
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/dependency-vuln-check.mts\"",
-            "timeout": 120
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-test.mts\"",
-            "timeout": 180
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/coverage-guard.mts\"",
-            "timeout": 180
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/chain.mts\"",
+            "timeout": 310
           }
         ]
       }
