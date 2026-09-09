@@ -9,5 +9,12 @@ services:
       - postgres:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: always
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   postgres: {}

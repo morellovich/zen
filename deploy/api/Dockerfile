@@ -14,6 +14,9 @@ RUN cp /usr/src/api/node_modules/prisma/libquery_engine-linux-musl.so.node ./
 # ENV DATABASE_URL=postgresql://user:pass@localhost:5432/database
 
 ENV PORT=7080
-EXPOSE 7080
+ENV SOCKETIO_PORT=7081
+
+EXPOSE 7080/tcp
+EXPOSE 7081/tcp
 
 CMD [ "node", "main.js" ]

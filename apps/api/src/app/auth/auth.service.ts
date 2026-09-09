@@ -50,10 +50,27 @@ export class AuthService {
   accessibleBy = accessibleBy;
 
   /**
+   * Verifies the token's signature and expiry before validating its claims.
+   *
    * @returns `RequestUser` if valid and `null` otherwise
    */
   async authorizeJwt(token: string): Promise<RequestUser | null> {
-    const jwtPayload = this.jwtService.decode(token) as JwtPayload;
+    let jwtPayload: JwtPayload;
+
+    try {
+      // `decode` performs no signature check, so an unverified payload must never reach `validate`
+      jwtPayload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: this.config.jwtOptions.publicKey
+          ? undefined
+          : (this.config.jwtOptions.secret as string),
+        publicKey: this.config.jwtOptions.publicKey as string | undefined,
+      });
+    } catch {
+      return null;
+    }
+
+    if (!jwtPayload) return null;
+
     return this.jwtStrategy.validate(jwtPayload);
   }
 }

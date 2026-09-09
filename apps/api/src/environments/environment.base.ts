@@ -13,6 +13,9 @@ export abstract class EnvironmentBase {
   readonly expressPort?: string | number;
   readonly cors?: NestApplicationOptions['cors'];
   readonly helmet?: boolean | FastifyHelmetOptions;
+  readonly socketio: {
+    readonly port: number;
+  };
   readonly graphql: {
     readonly subscriptions?: boolean;
     readonly sandbox?: boolean;

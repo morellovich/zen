@@ -35,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(payload: JwtPayload): Promise<RequestUser | null> {
     // Validate the audience as the site URL
-    if (payload.aud !== this.config.siteUrl) return null;
+    if (!payload || payload.aud !== this.config.siteUrl) return null;
 
     return {
       id: payload.sub,

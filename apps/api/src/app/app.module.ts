@@ -8,6 +8,7 @@ import { ZenGraphQLModule } from './graphql';
 import { JwtModule } from './jwt';
 import { MailModule } from './mail';
 import { PrismaModule } from './prisma';
+import { WebsocketsModule } from './websockets';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PrismaModule } from './prisma';
     JwtModule,
     MailModule,
     PrismaModule,
+    WebsocketsModule,
   ],
   controllers: [ToolsController],
 })

@@ -16,6 +16,9 @@ export const environment: EnvironmentBase = {
     // `capacitor://localhost` is the iOS native origin, `https://localhost` the Android one
     origin: ['https://portal.site.com', 'capacitor://localhost', 'https://localhost'],
   },
+  socketio: {
+    port: +(process.env.SOCKETIO_PORT as string),
+  },
   graphql: {
     subscriptions: true,
     sandbox: false,
