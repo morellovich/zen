@@ -79,4 +79,15 @@ export const environment: EnvironmentBase = {
       scope: ['email'],
     },
   },
+  openTelemetry: {
+    serviceName: 'zen-api',
+    exporters: {
+      trace: {
+        url: 'http://localhost:4318/v1/traces',
+      },
+      meter: {
+        url: 'http://localhost:4318/v1/metrics',
+      },
+    },
+  },
 };

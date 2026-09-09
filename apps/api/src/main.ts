@@ -1,3 +1,6 @@
+// Must stay the first import: instrumentation patches modules at load time
+import './tracing';
+
 import helmet from '@fastify/helmet';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';

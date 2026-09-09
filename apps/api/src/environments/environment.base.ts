@@ -3,6 +3,8 @@ import { MailerOptions } from '@nestjs-modules/mailer';
 import { NestApplicationOptions } from '@nestjs/common';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { ThrottlerModuleOptions } from '@nestjs/throttler';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import processRequest from 'graphql-upload/processRequest.mjs';
 import { StrategyOptions as GoogleStrategyOptions } from 'passport-google-oauth20';
 
@@ -42,4 +44,14 @@ export abstract class EnvironmentBase {
     loginConfirmedURL: string;
     google?: GoogleStrategyOptions;
   };
+  /** @see `deploy/README_OTLP.md` for details */
+  readonly openTelemetry?:
+    | false
+    | {
+        serviceName: string;
+        exporters: {
+          trace?: ConstructorParameters<typeof OTLPTraceExporter>[0];
+          meter?: ConstructorParameters<typeof OTLPMetricExporter>[0];
+        };
+      };
 }

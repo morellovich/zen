@@ -10,6 +10,7 @@ allowBuilds:
   msgpackr-extract: true
   nx: true
   prisma: true
+  protobufjs: false
   unrs-resolver: true
   yarn: true
 onlyBuiltDependencies:
