@@ -45,6 +45,8 @@
     "@nestjs/platform-socket.io": "^11.2.3",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/websockets": "^11.2.3",
+    "@ngx-translate/core": "^18.0.0",
+    "@ngx-translate/http-loader": "^18.0.0",
     "@opentelemetry/exporter-metrics-otlp-http": "^0.222.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.222.0",
     "@opentelemetry/instrumentation-graphql": "^0.70.0",

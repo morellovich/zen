@@ -37,6 +37,9 @@ export abstract class Environment {
     readonly graphqlSubscriptions?: string;
     readonly socketio?: string;
   };
+
+  /** Language used when the visitor has not picked one */
+  abstract readonly defaultLanguage: string;
 }
 
 export class EnvironmentDev implements Environment {
@@ -55,6 +58,7 @@ export class EnvironmentDev implements Environment {
     graphqlSubscriptions: 'ws://localhost:7080/graphql',
     socketio: 'http://localhost:7081',
   } as const;
+  defaultLanguage = 'en' as const;
 }
 
 export class EnvironmentProd implements Environment {
@@ -73,4 +77,5 @@ export class EnvironmentProd implements Environment {
     graphqlSubscriptions: 'wss://api.site.com/graphql',
     socketio: 'https://api.site.com:7081',
   } as const;
+  defaultLanguage = 'en' as const;
 }

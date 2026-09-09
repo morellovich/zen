@@ -9,13 +9,20 @@ import {
 } from '@angular/router';
 import { PureAbility } from '@casl/ability';
 import { createPrismaAbility } from '@casl/prisma';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { accessToken, authInterceptorFn } from '@zen/auth';
 import { Environment } from '@zen/common';
+import { CURRENT_LANG_LS_KEY } from '@zen/components';
 import { ZenGraphQLModule } from '@zen/graphql';
 import { possibleTypes, typePolicies } from '@zen/graphql/client';
 
+import ls from 'localstorage-slim';
+
 import { environment } from '../environments/environment';
 import { APP_ROUTES } from './app.routes';
+
+const currentLang = ls.get<string>(CURRENT_LANG_LS_KEY);
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,6 +30,11 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptorFn])),
     provideRouter(APP_ROUTES, withEnabledBlockingInitialNavigation(), withHashLocation()),
     { provide: Environment, useValue: environment },
+    provideTranslateService({
+      lang: currentLang ?? environment.defaultLanguage,
+      fallbackLang: environment.defaultLanguage,
+      loader: provideTranslateHttpLoader({ prefix: 'assets/i18n/', suffix: '.json' }),
+    }),
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     {
       provide: PureAbility,

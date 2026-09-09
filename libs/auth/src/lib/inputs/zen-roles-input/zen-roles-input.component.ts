@@ -13,6 +13,7 @@ import {
 import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Role } from '@zen/common';
 import { ZenSnackbarError, ZenSnackbarModule } from '@zen/components';
 import { Subscription } from 'rxjs';
@@ -27,6 +28,7 @@ import { Subscription } from 'rxjs';
     MatFormFieldModule,
     MatIconModule,
     ReactiveFormsModule,
+    TranslatePipe,
     ZenSnackbarModule,
   ],
   providers: [
@@ -42,10 +44,11 @@ export class ZenRolesInputComponent implements ControlValueAccessor, OnDestroy {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   readonly control = new FormControl<string[]>([], { nonNullable: true });
   readonly #subs: Subscription[] = [];
-  touchedListeners: Array<() => unknown> = [];
   private zenSnackbarError = inject(ZenSnackbarError);
+  translate = inject(TranslateService);
+  touchedListeners: Array<() => unknown> = [];
 
-  @Input() label = 'Roles';
+  @Input() labelTranslationKey = 'ROLES';
 
   get filteredRoles() {
     return this.ROLES.filter(r => !this.control.value.includes(r));

@@ -21,6 +21,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ApolloError } from '@apollo/client/errors';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Environment } from '@zen/common';
 import { ZenLoadingComponent } from '@zen/components';
 import { verticalAccordion } from '@zen/components/animations';
@@ -61,10 +62,11 @@ interface FormType {
     MatIconModule,
     MatInputModule,
     ReactiveFormsModule,
+    TranslatePipe,
     ZenEmailInputComponent,
     ZenLoadingComponent,
-    ZenUsernameInputComponent,
     ZenPasswordInputComponent,
+    ZenUsernameInputComponent,
   ],
 })
 export class ZenRegisterFormComponent implements AfterContentInit, OnDestroy {

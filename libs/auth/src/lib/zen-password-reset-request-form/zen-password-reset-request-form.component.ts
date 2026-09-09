@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ApolloError } from '@apollo/client/errors';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ApiConstants, ApiError } from '@zen/common';
 import { ZenLoadingComponent } from '@zen/components';
 import { verticalAccordion } from '@zen/components/animations';
@@ -43,6 +44,7 @@ interface FormType {
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    TranslatePipe,
     ZenLoadingComponent,
   ],
 })

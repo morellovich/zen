@@ -1,0 +1,8 @@
+<button
+  type="button"
+  matButton
+  (click)="openModal()"
+  [title]="'SELECT_LANGUAGE' | translate">
+  <i class="fa-solid fa-earth-americas"></i>
+  {{ languageDisplayText() }}
+</button>
