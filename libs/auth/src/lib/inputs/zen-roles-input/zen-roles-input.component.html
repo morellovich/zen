@@ -1,0 +1,29 @@
+<mat-form-field class="example-chip-list w-100">
+  <mat-label>{{label}}</mat-label>
+  
+  <mat-chip-grid #chipGrid>
+
+    @for(role of control.value; track role) {
+      <mat-chip-row (removed)="remove(role)">
+        {{role}}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+    }
+    
+    <input placeholder="New role..." #roleInput
+      [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+      (matChipInputTokenEnd)="add($event)"/>
+
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+      @for(role of filteredRoles; track role) {
+        <mat-option [value]="role">
+          {{role}}
+        </mat-option>
+      }
+    </mat-autocomplete>
+
+  </mat-chip-grid>
+</mat-form-field>

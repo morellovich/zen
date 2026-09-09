@@ -1,0 +1,58 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
+import { ApolloServerPlugin } from '@apollo/server';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
+import { ApolloDriverConfig } from '@nestjs/apollo';
+import { Injectable } from '@nestjs/common';
+import { GqlOptionsFactory } from '@nestjs/graphql';
+import { print } from 'graphql';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
+
+import { ConfigService } from '../config';
+import { IContext } from './models';
+import { ALL_TYPE_DEFS } from './resolvers';
+
+@Injectable()
+export class GqlConfigService implements GqlOptionsFactory {
+  constructor(private readonly config: ConfigService) {}
+
+  createGqlOptions(): ApolloDriverConfig {
+    const plugins: ApolloServerPlugin[] = [];
+    if (this.config.graphql.sandbox && !this.config.production)
+      plugins.push(ApolloServerPluginLandingPageLocalDefault());
+    if (this.config.graphql.sandbox && this.config.production)
+      plugins.push(ApolloServerPluginLandingPageProductionDefault());
+
+    return {
+      typeDefs: print(ALL_TYPE_DEFS),
+      resolvers: { Upload: GraphQLUpload },
+      playground: false,
+      plugins,
+      introspection: !!this.config.graphql.introspection,
+      allowBatchedHttpRequests: true,
+      csrfPrevention: this.config.graphql.csrfPrevention,
+      cache: 'bounded',
+      installSubscriptionHandlers: !!this.config.graphql.subscriptions,
+      subscriptions: this.config.graphql.subscriptions
+        ? {
+            'graphql-ws': {
+              onConnect: (context: any) => {
+                const { connectionParams, extra } = context;
+                extra.token = connectionParams.token;
+              },
+            },
+          }
+        : undefined,
+      context: (request: any, reply?: any): IContext => {
+        // Subscriptions pass through JWT token for authentication
+        if (request?.extra) return { req: request.extra };
+        if (request?.req) return request;
+        // Queries, Mutations with Fastify
+        return { req: request, res: reply };
+      },
+    };
+  }
+}

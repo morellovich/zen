@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Allow files and directories
+!/dist/**
+!package*.json
+!pnpm-lock.yaml
+!apps/api/prisma/schema.prisma

@@ -1,0 +1,51 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  @if(loading) {
+    <zen-loading/>
+  }
+
+  <div class="mb-2">
+    <zen-username-input #usernameInput [formControl]="username" required/>
+  </div>
+
+  <zen-password-input #passwordInput [formControl]="password" required/>
+  
+  <div class="mb-4">
+    <mat-checkbox [formControl]="rememberMe">Remember me</mat-checkbox>
+  </div>
+
+  <button type="submit" matButton="filled" class="w-100 fs-4 py-1" [disabled]="!form.valid">
+    <i class="fa-solid fa-fw fa-sign-in-alt me-1"></i>
+    Login
+  </button>
+
+  @if(generalError) {
+    <mat-error @verticalAccordion class="text-center my-3">
+      There was a problem logging you in. If this continues, please contact us.
+    </mat-error>
+  }
+  
+  @if(env.enableGoogleOAuth) {
+    <hr>
+
+    <h2 class="text-center">OR</h2>
+
+    <button type="button" matButton="elevated" (click)="loginWithGoogle()" class="w-100 fs-4 py-1" [disabled]="loading">
+      <img src="assets/logos/google.svg" alt="" width="20" height="20" class="me-2 align-middle">
+      Sign in with Google
+    </button>
+  }
+
+  @if(emailTakenError) {
+    <mat-error @verticalAccordion class="text-center my-3">
+      There is an existing account associated with the e-mail address you attempted to log in with.
+      Log into your existing account to associate your third-party authentication from there.
+    </mat-error>
+  }
+
+  @if(done && doneMessageVisible) {
+    <div @verticalAccordion class="text-center my-3">
+      Redirecting...
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+  }
+</form>

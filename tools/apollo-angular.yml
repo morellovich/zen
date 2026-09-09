@@ -1,0 +1,19 @@
+overwrite: true
+schema: 
+  - http://localhost:7080/graphql
+  - libs/graphql/src/lib/client/schema.gql.ts
+documents: 
+  - "libs/**/*.ts"
+  - "!libs/graphql/src/lib/apollo-angular.ts"
+  - "apps/portal/src/**/*.ts"
+config:
+  ngModule: ./zen-graphql.module#ZenGraphQLModule
+  omitOperationSuffix: true
+  pureMagicComment: true
+  addExplicitOverride: true
+generates:
+  libs/graphql/src/lib/apollo-angular.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-apollo-angular"

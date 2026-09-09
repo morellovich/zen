@@ -1,0 +1,22 @@
+.zen-table-header {
+  user-select: none;
+  white-space: nowrap;
+}
+
+.zen-table-header-sortable {
+  cursor: pointer;
+}
+
+.zen-table-sort-icon {
+  font-size: 1rem;
+  height: 1rem;
+  width: 1rem;
+  vertical-align: middle;
+}
+
+.zen-table-pagination {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

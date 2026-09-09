@@ -1,0 +1,68 @@
+<table class="table table-hover align-middle">
+  <thead>
+    @for (headerGroup of table.getHeaderGroups(); track headerGroup.id) {
+      <tr>
+        @for (header of headerGroup.headers; track header.id) {
+          <th
+            scope="col"
+            class="zen-table-header"
+            [class.zen-table-header-sortable]="header.column.getCanSort()"
+            (click)="header.column.getToggleSortingHandler()?.($event)"
+          >
+            <ng-container *flexRenderHeader="header; let content">{{ content }}</ng-container>
+            @switch (header.column.getIsSorted()) {
+              @case ('asc') {
+                <mat-icon class="zen-table-sort-icon">arrow_upward</mat-icon>
+              }
+              @case ('desc') {
+                <mat-icon class="zen-table-sort-icon">arrow_downward</mat-icon>
+              }
+            }
+          </th>
+        }
+      </tr>
+    }
+  </thead>
+
+  <tbody>
+    @for (row of table.getRowModel().rows; track row.id) {
+      <tr>
+        @for (cell of row.getAllCells(); track cell.id) {
+          <td>
+            <ng-container *flexRenderCell="cell; let content">{{ content }}</ng-container>
+          </td>
+        }
+      </tr>
+    } @empty {
+      <tr>
+        <td [attr.colspan]="table.getAllLeafColumns().length" class="text-center">No records</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (table.getPageCount() > 1) {
+  <div class="zen-table-pagination">
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Previous page"
+      [disabled]="!table.getCanPreviousPage()"
+      (click)="table.previousPage()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <span>{{ table.atoms.pagination.get().pageIndex + 1 }} / {{ table.getPageCount() }}</span>
+
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Next page"
+      [disabled]="!table.getCanNextPage()"
+      (click)="table.nextPage()"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+}

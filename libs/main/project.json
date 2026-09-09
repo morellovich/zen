@@ -1,0 +1,53 @@
+{
+  "name": "main",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/main/src",
+  "prefix": "zen",
+  "projectType": "library",
+  "tags": ["scope:frontend", "type:feature"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/main/jest.config.ts",
+        "tsConfig": "libs/main/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "storybook": {
+      "options": {
+        "port": 4402,
+        "styles": ["apps/portal/src/styles.scss"]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "options": {
+        "outputDir": "dist/storybook/main",
+        "styles": ["apps/portal/src/styles.scss"]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "test-storybook": {
+      "options": {
+        "command": "test-storybook -c .storybook --url=http://localhost:4402"
+      }
+    },
+    "static-storybook": {
+      "options": {
+        "staticFilePath": "dist/storybook/main"
+      }
+    }
+  }
+}

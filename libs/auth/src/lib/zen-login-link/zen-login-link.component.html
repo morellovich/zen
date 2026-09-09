@@ -1,0 +1,13 @@
+@if(displayLogout) {
+  <span *ifLoggedIn="true" (click)="auth.logout()" (keydown.enter)="auth.logout()" tabindex="0" style="cursor: pointer;">
+    <i class="fa-solid fa-lock me-2"></i>
+    Logout
+  </span>
+}
+
+@if(displayLogin$ | async) {
+  <a *ifLoggedIn="false" routerLink="/login">
+    <i class="fa-solid fa-sign-in-alt me-2"></i>
+    Login
+  </a>
+}

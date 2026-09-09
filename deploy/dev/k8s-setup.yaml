@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zen-api
+  labels:
+    app: zen-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zen-api
+  template:
+    metadata:
+      labels:
+        app: zen-api
+    spec:
+      containers:
+        - name: zen-api
+          image: zen-api:latest
+          imagePullPolicy: Never
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "400Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          ports:
+            - containerPort: 7080
+              name: zen-api-port
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: pg-secret
+                  key: DATABASE_URL
+            - name: JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zen-jwt
+                  key: JWT_PRIVATE_KEY
+            - name: JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zen-jwt
+                  key: JWT_PUBLIC_KEY
+            - name: SMTP_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: zen-smtp
+                  key: SMTP_SERVER
+            - name: SMTP_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: zen-smtp
+                  key: SMTP_LOGIN
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zen-smtp
+                  key: SMTP_PASSWORD
+            - name: SMTP_FROM_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: zen-smtp
+                  key: SMTP_FROM_NAME
+            - name: SMTP_FROM_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: zen-smtp
+                  key: SMTP_FROM_EMAIL
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: zen-google-oauth
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: zen-google-oauth
+                  key: GOOGLE_CLIENT_SECRET
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zen-api-svc
+spec:
+  selector:
+    app: zen-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: zen-api-port
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zen-ingress
+  labels:
+    name: zen-ingress
+spec:
+  rules:
+    - host: zen.<IP>.nip.io # Replace <IP> to the IP of your ingress
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: zen-api-svc
+                port:
+                  number: 80

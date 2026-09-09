@@ -1,0 +1,64 @@
+<form @verticalAccordionLeave [formGroup]="form" (ngSubmit)="onSubmit()">
+  @if(loading) {
+    <zen-loading/>
+  }
+
+  @if(env.enableGoogleOAuth) {
+    <button type="button" matButton="elevated" (click)="loginWithGoogle()" class="w-100 fs-4 py-1 my-2" [disabled]="loading">
+      <img src="assets/logos/google.svg" alt="" width="20" height="20" class="me-2 align-middle">
+      Sign up with Google
+    </button>
+  
+    <hr>
+  
+    <h2 class="text-center">Or sign up with e-mail</h2>
+  }
+  
+  <div class="mb-2">
+    <zen-username-input #usernameInput [formControl]="username" required/>
+  </div>
+
+  <div class="mb-2">
+    <zen-email-input #emailInput [formControl]="email" required/>
+  </div>
+
+  <div class="mb-2">
+    <zen-password-input [formControl]="password" required/>
+  </div>
+
+  <mat-form-field hideRequiredMarker class="w-100 mb-2">
+    <mat-label>Confirm Password</mat-label>
+    <input matInput autocomplete="new-password" [type]="hidePassword ? 'password' : 'text'" [formControl]="passwordConfirm">
+    <button type="button" matIconButton matSuffix (click)="hidePassword = !hidePassword" tabindex="-1" title="Toggle show password">
+      <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+    </button>
+
+    @if(passwordConfirm.hasError('required')) {
+      <mat-error>Required</mat-error>
+    }
+
+    @if(passwordConfirm.hasError('notMatching')) {
+      <mat-error>Password confirmation does not match</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="mb-4">
+    <mat-checkbox [formControl]="acceptTerms">I accept the terms and conditions</mat-checkbox>
+    
+    @if(acceptTerms.invalid && acceptTerms.touched) {
+      <mat-error>Accept the terms and conditions</mat-error>
+    }
+  </div>
+
+  <button type="submit" matButton="filled" class="w-100 fs-4 py-1" [disabled]="!form.valid">
+    <i class="fa-solid fa-fw fa-cloud-upload-alt me-1"></i>
+    Submit
+  </button>
+
+  @if(generalError) {
+    <mat-error @verticalAccordion class="text-center mt-3">
+      There was a problem with your registration.<br>
+      If this continues, please contact us
+    </mat-error>
+  }
+</form>
