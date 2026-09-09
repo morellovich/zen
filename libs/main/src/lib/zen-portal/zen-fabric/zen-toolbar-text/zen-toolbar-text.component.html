@@ -1,0 +1,21 @@
+<label class="me-3">
+  Fill:
+  <!-- Native colour input; the Kendo colorpicker the source branch used is a paid dependency -->
+  <input
+    type="color"
+    [value]="fill"
+    (input)="setFill($any($event.target).value)"
+    (change)="refocusTextbox()"
+    title="Text fill colour">
+</label>
+
+<mat-form-field>
+  <mat-label>Font</mat-label>
+  <mat-select #fontSelect (closed)="setFont(fontSelect.value)" [style.font-family]="fontSelect.value">
+    @for(font of fonts; track font) {
+      <mat-option [value]="font" [style.font-family]="font">
+        {{font}}
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>
