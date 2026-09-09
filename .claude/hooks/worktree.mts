@@ -20,11 +20,17 @@ export function reroot(root: string, abs: string): string {
   return prefix ? join(root, prefix) : root;
 }
 
-if (process.argv[2] === '--selftest') {
+// `import.meta.main` is load-bearing, not decoration: ESM evaluates an import before the
+// body of the module importing it, so without it `node <any-hook>.mts --selftest` ran THIS
+// block and exited 0 — every importing hook reported a green selftest it never executed.
+if (import.meta.main && process.argv[2] === '--selftest') {
   const assert = await import('node:assert/strict');
 
   assert.equal(reroot('/r', '/r/libs/auth/src/lib/auth.service.ts'), '/r'); // main checkout
-  assert.equal(reroot('/r', '/r/.worktrees/feat-x/libs/auth/src/lib/auth.service.ts'), '/r/.worktrees/feat-x');
+  assert.equal(
+    reroot('/r', '/r/.worktrees/feat-x/libs/auth/src/lib/auth.service.ts'),
+    '/r/.worktrees/feat-x'
+  );
   assert.equal(reroot('/r', '/r/worktrees/feat-x/apps/api/src/main.ts'), '/r/worktrees/feat-x'); // undotted
   assert.equal(reroot('/r', '/r/.worktrees/feat-x'), '/r/.worktrees/feat-x'); // the worktree root itself
   assert.equal(reroot('/r', '/r/.worktrees'), '/r'); // the container is not a worktree
