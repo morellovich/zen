@@ -1,9 +1,11 @@
 name: SuperSpec
-version: 4
+version: 5
 description: >
   Spec-driven workflow integrated with Superpowers skills.
-  brainstorm → proposal → specs → tasks → plan → apply → verify → finalize.
-  design is optional (produced from brainstorm but not required by tasks).
+  brainstorm → proposal → (specs ∥ design → adr) → tasks → plan →
+  apply → verify → finalize.
+  design requires proposal and is mandatory; adr requires design;
+  tasks requires both specs and adr.
   Apply is both a DAG artifact (generates apply.md, a minimal receipt)
   and a top-level apply: phase block (canonical /opsx:apply instruction
   body). Verify requires apply, so /opsx:verify cannot run before
@@ -29,6 +31,16 @@ description: >
   wording is also updated to recommend a user-created feature branch
   as the canonical starting state (previously the schema recommended
   starting on the integration branch).
+  v5 (current): borrowed from the `intent-driven` schema
+  (intent-driven-dev/openspec-schemas, MIT) — design now requires
+  proposal instead of brainstorm and is a hard gate on tasks (it was
+  an optional dead branch that nothing depended on); a new `adr`
+  artifact sits between design and tasks, writing a per-change review
+  manifest plus immutable, monotonically-numbered ADR files to the repository's `docs/adr/` folder; scenarios are authored in
+  Gherkin GIVEN/WHEN/THEN style; tasks must include an
+  `openspec validate --strict` verification task. The stale
+  `superpowers:using-git-worktrees` invocation in apply step 1 is
+  replaced with direct worktree creation.
 
 artifacts:
   - id: brainstorm
@@ -87,6 +99,22 @@ artifacts:
     instruction: |
       Create the design document explaining HOW to implement the change.
 
+      design.md is REQUIRED — tasks cannot be planned until design and
+      adr are complete. (Before v5, design was an optional side branch
+      off brainstorm that nothing depended on, so architectural
+      decisions could be skipped silently.)
+
+      Prior decisions (read existing ADRs first):
+      List every file in the repository's `docs/adr/` folder, then
+      build the supersession graph from each ADR's `Supersedes:` field —
+      an ADR is no longer in force if a later ADR supersedes it. Only
+      the in-force ADRs (accepted, not superseded) constrain this
+      design; superseded ones are historical context and MUST NOT be
+      treated as live commitments. New decisions MUST be coherent with
+      the in-force set. If an in-force ADR needs revisiting, do NOT
+      modify it — flag it under Open Questions and let the adr step
+      record a new superseding ADR.
+
       Check if brainstorming already produced a design.md file.
       If design.md already exists with content from brainstorming,
       review and refine it rather than starting from scratch.
@@ -105,7 +133,70 @@ artifacts:
       Focus on architecture and approach, not line-by-line implementation.
       Good design docs explain the "why" behind technical decisions.
     requires:
-      - brainstorm
+      - proposal
+
+  - id: adr
+    generates: adr.md
+    description: Per-change ADR review manifest and durable decision handoff
+    template: adr.md
+    instruction: |
+      Complete the ADR review for this change by writing a concise
+      manifest at `openspec/changes/<change>/adr.md`. This change-local
+      file is the completion marker for the adr step. Files already
+      under the repository's `docs/adr/` folder are required
+      context for the review, but they NEVER satisfy completion for a
+      new change.
+
+      If this change introduces a major durable architectural decision,
+      also create an Architecture Decision Record under `docs/adr/`,
+      resolved from the repository root — NOT inside `openspec/`.
+      Create the folder if it does not exist. These files persist
+      across changes, so they MUST live outside `openspec/`
+      (otherwise `/opsx:archive` buries them with the change).
+
+      IRON RULE — an accepted ADR is immutable. You MUST NOT edit a
+      prior ADR file: not its Status, not its body, not its date. To
+      change a previously accepted decision, record a NEW ADR whose
+      Status is "accepted, supersedes ADR-NNNN" and whose `Supersedes:`
+      field names the prior one. Consumers derive what is in force by
+      walking `Supersedes:` links across the folder; the prior ADR
+      stays frozen as a historical record.
+
+      Process:
+      1. Read every existing ADR in `docs/adr/`. Build the
+         supersession graph. Note the highest sequence number in use.
+      2. Re-read design.md. A decision qualifies for an ADR only if it
+         meets ALL of:
+         - It establishes a long-term architectural commitment
+           (pattern, technology, boundary, contract) — not a tactical
+           implementation detail.
+         - It will affect changes beyond this one.
+         - It is not already captured by an in-force ADR, OR it
+           intentionally diverges from one (then the new ADR supersedes
+           the prior).
+      3. For each qualifying decision, create a NEW file at
+         `docs/adr/NNNN-kebab-title.md` where NNNN is 4 digits, one
+         greater than the highest existing. The sequence is monotonic
+         across the repo and never reused (e.g.
+         `0042-use-prisma-for-catalog.md`). Include title, Status,
+         Date, optional `Supersedes:`, and the MADR-short sections:
+         Context, Decision, Consequences. When it replaces an in-force
+         ADR, set Status to "accepted, supersedes ADR-NNNN", populate
+         `Supersedes:`, and explain in Context why the prior decision
+         is being revisited. Do NOT touch the prior ADR's file.
+      4. Write `adr.md` from templates/adr.md. The manifest MUST state
+         that ADR review completed for this change, list the in-force
+         ADRs reviewed, and reference every repository-level ADR file
+         created for this change. It MUST NOT duplicate the full
+         Context / Decision / Consequences content from those files.
+      5. If nothing meets the bar, do NOT invent ADRs. The manifest
+         MUST state explicitly that no major durable architectural
+         decisions were introduced and no new ADR files were created.
+
+      Adapted from the `intent-driven` schema's adr artifact
+      (intent-driven-dev/openspec-schemas, MIT).
+    requires:
+      - design
 
   - id: specs
     generates: "specs/**/*.md"
@@ -127,9 +218,24 @@ artifacts:
       Format requirements:
       - Each requirement: `### Requirement: <name>` followed by description
       - Use SHALL/MUST for normative requirements (avoid should/may)
-      - Each scenario: `#### Scenario: <name>` with WHEN/THEN format
+      - Each scenario: `#### Scenario: <name>` with GIVEN/WHEN/THEN steps
+        as bold bullets — `- **GIVEN** <starting context>`,
+        `- **WHEN** <action or event>`, `- **THEN** <observable outcome>`.
+        Omit GIVEN only when the scenario genuinely has no precondition.
+        Continue a step type with `- **AND**`.
       - **CRITICAL**: Scenarios MUST use exactly 4 hashtags (`####`). Using 3 hashtags or bullets will fail silently.
       - Every requirement MUST have at least one scenario.
+
+      Write the step text in Gherkin style: domain language, one
+      meaningful event per WHEN, and a THEN that names an outcome
+      observable to a user or an external system (not hidden database
+      state). Use the Skill tool to invoke **gherkin-authoring** when
+      drafting or reviewing scenarios.
+
+      Do NOT use column-0 ```gherkin fences here. Fenced Gherkin is the
+      `spec-as-source` format, which is not adopted in this repo — it
+      needs an acceptance-test runner that does not exist here. See
+      openspec/config.yaml.
 
       Specs should be testable - each scenario is a potential test case.
     requires:
@@ -151,12 +257,16 @@ artifacts:
       - Tasks should be small enough to complete in one session
       - Order tasks by dependency (what must be done first?)
 
-      Reference specs for what needs to be built. If design.md exists,
-      reference it for how to build it — but design is optional (see
-      openspec-conventions: design.md is only for changes that need to
-      explain non-trivial technical decisions).
+      - Include a final verification task that runs
+        `openspec validate <change> --type change --strict` before
+        archive whenever the change touches delta specs.
+
+      Reference specs for what needs to be built, design.md for how to
+      build it, and the repository's `docs/adr/` folder for the
+      durable architectural commitments this work must honor.
     requires:
       - specs
+      - adr
 
   - id: plan
     generates: plan.md
@@ -259,7 +369,8 @@ artifacts:
         offending artifact, then re-enter apply.
       - Iteration > 5 → stop looping; report to the user.
 
-      See docs/workflow-details.md for the full convergence pattern.
+      See INTEGRATION.md §3 (Artifact DAG, key points) for the full
+      convergence pattern.
 
       If `openspec-verify-change` skill is unavailable, fall back to
       running the 5 checks manually and recording results in verify.md.
@@ -598,9 +709,7 @@ artifacts:
       the steps above against the upstream skill's current Step 5
       (Option 1) and Step 6, port any meaningful behavioral
       changes back into this instruction, then update the commit
-      hash above. A short subsection in docs/workflow-details.md
-      ("Borrowed logic and recreation method") restates this
-      discipline.
+      hash above. INTEGRATION.md §6.6 restates this discipline.
 
       ------------------------------------------------------------
       Escape hatch: manual skill invocation
@@ -630,8 +739,8 @@ artifacts:
       even outside the canonical automation.
 
       Once finalize.md exists, the change is git-clean and ready
-      for /opsx:archive. See docs/workflow-details.md Phase 6
-      (Archival) for the golden path.
+      for /opsx:archive. See INTEGRATION.md §4 Step 5 (Archive) for
+      the golden path.
     requires:
       - verify
 
@@ -688,9 +797,14 @@ apply:
             apply on the detached HEAD; the worktree will still be
             created.
 
-    1. **Workspace**: Use the Skill tool to invoke
-       **superpowers:using-git-worktrees** to create an isolated
-       git worktree for this change.
+    1. **Workspace**: Create an isolated git worktree for this change.
+       Prefer the harness's native worktree control (Claude Code:
+       EnterWorktree), which also re-roots the project dir so
+       repo-local hooks keep applying. Otherwise run
+       `git worktree add .worktrees/<change-name> -b <change-name>`
+       from the repo root, then install dependencies inside it.
+       NOTE: superpowers no longer ships a `using-git-worktrees`
+       skill (removed in 6.x); do not try to invoke it.
 
     2. **Executor** — on Claude Code, Cursor, or OpenCode, you should
        **always use 2a**. 2b exists only as a fallback for platforms

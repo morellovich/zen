@@ -10,6 +10,18 @@ Hard formatting rules (validated by OpenSpec):
 - Requirement sentences MUST contain `SHALL` or `MUST`
 - Each Requirement MUST have at least one `#### Scenario:`
 - Scenarios MUST use level-4 (`####`) — level-3 or bullet will silently fail
+
+Scenario steps are written in Gherkin style as bold bullets:
+- **GIVEN** the starting context (omit only if there is genuinely no precondition)
+- **WHEN** one meaningful action or event
+- **THEN** an outcome observable to a user or an external system
+- **AND** continues whichever step type precedes it
+
+Keep steps in domain language: no UI clicks, HTTP verbs, table rows or mocks —
+those belong in the tests, not the spec. Invoke the `gherkin-authoring` skill
+when drafting or reviewing scenarios. Do NOT use column-0 ```gherkin fences;
+that is the `spec-as-source` format, which is not adopted here (see
+openspec/config.yaml).
 -->
 
 ## ADDED Requirements
@@ -17,11 +29,12 @@ Hard formatting rules (validated by OpenSpec):
 <!-- New behavior. List new Requirements this change adds to the capability. -->
 
 ### Requirement: <!-- requirement name -->
-<!-- requirement text — 須含 SHALL 或 MUST -->
+<!-- requirement text — MUST contain SHALL or MUST -->
 
 #### Scenario: <!-- scenario name -->
-- **WHEN** <!-- condition -->
-- **THEN** <!-- expected outcome -->
+- **GIVEN** <!-- starting context -->
+- **WHEN** <!-- action or event -->
+- **THEN** <!-- observable outcome -->
 
 ---
 
@@ -40,8 +53,9 @@ archive applies MODIFIED sections via full-text replacement.
 <!-- full modified requirement text — must contain SHALL or MUST -->
 
 #### Scenario: <!-- scenario name (can be new or modified) -->
-- **WHEN** <!-- condition -->
-- **THEN** <!-- expected outcome -->
+- **GIVEN** <!-- starting context -->
+- **WHEN** <!-- action or event -->
+- **THEN** <!-- observable outcome -->
 
 ---
 

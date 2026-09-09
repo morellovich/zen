@@ -28,14 +28,18 @@ A custom schema leverages OpenSpec's **natively supported project-level schema m
 ## Workflow Overview
 
 ```text
-brainstorm ──→ proposal ──→ specs ──→ tasks ──→ plan ──→ apply ──→ verify ──→ finalize
-                  │                     ↑
-                  └──→ design ──────────┘
+brainstorm ──→ proposal ──→ specs ─────────────→ tasks ──→ plan ──→ apply ──→ verify ──→ finalize
+                  │                                 ↑
+                  └──→ design ──→ adr ──────────────┘
 ```
+
+`specs` and `design` both require only the proposal and can proceed in
+parallel; `adr` requires `design`; `tasks` requires **both** `specs` and `adr`.
+Design is mandatory as of v5 — see Design Choice #7.
 
 Differences from `spec-driven`:
 
-| | spec-driven | superspec (v4) |
+| | spec-driven | superspec (v5) |
 |---|---|---|
 | Starting point | proposal (written manually) | **brainstorm** (invokes brainstorming skill) |
 | Endpoint | tasks (coarse-grained) | **finalize** (the git-side closeout: merge worktree → feature branch + push the branch + if a PR exists, post code-reviewer onboarding comment; archive follows as a CLI step) |
@@ -44,6 +48,10 @@ Differences from `spec-driven`:
 | Additional artifacts | — | brainstorm, plan, apply (receipt), **finalize (receipt)** |
 | verify requires | tasks | **apply** (v2 — was plan in v1) |
 | finalize requires | — | **verify** (v3) |
+| design requires | proposal | **proposal** (v5 — was brainstorm) |
+| design optional? | yes | **no — gates tasks via adr** (v5) |
+| Durable decisions | — | **adr artifact + immutable `docs/adr/` files** (v5) |
+| Scenario steps | WHEN/THEN | **GIVEN/WHEN/THEN Gherkin bullets** (v5) |
 
 ---
 
@@ -52,8 +60,9 @@ Differences from `spec-driven`:
 | Schema Phase | Superpowers Skill Invoked | Trigger |
 |------------|------------------------|---------|
 | brainstorm artifact | `superpowers:brainstorming` | artifact instruction |
+| specs artifact | `gherkin-authoring` (vendored, not a superpowers skill) | artifact instruction |
+| adr artifact | `architectural-decision-records` (vendored) | invoke by hand; schema's format wins |
 | plan artifact | `superpowers:writing-plans` | artifact instruction |
-| apply phase | `superpowers:using-git-worktrees` | apply instruction |
 | apply phase | `superpowers:subagent-driven-development` | apply instruction |
 | finalize artifact | `superpowers:finishing-a-development-branch` | **Manual escape hatch only (v4)** — the git-side closeout is executed by the schema directly |
 
@@ -74,7 +83,7 @@ This is achieved through context injection (appending directives when invoking t
 
 ### Quick Flow (Recommended)
 ```bash
-/opsx:ff my-feature    # End-to-end: create directory + brainstorm + proposal + design + specs + tasks + plan
+/opsx:ff my-feature    # End-to-end: create directory + brainstorm + proposal + specs + design + adr + tasks + plan
 /opsx:apply            # worktree + subagent-driven-development (writes apply.md)
 /opsx:verify           # 5 OpenSpec checks (writes verify.md; requires apply.md)
 /opsx:continue         # → finalize (the git-side closeout: merges worktree → feature branch, pushes branch, updates PR if one exists, writes finalize.md, posts code-reviewer comment if PR exists; v4)
@@ -86,9 +95,10 @@ This is achieved through context injection (appending directives when invoking t
 /opsx:new my-feature --schema superspec
 /opsx:continue         # → brainstorm (interactive conversation)
 /opsx:continue         # → proposal
-/opsx:continue         # → design (optional, only when technical decisions need explanation)
-/opsx:continue         # → specs
-/opsx:continue         # → tasks
+/opsx:continue         # → specs      (sibling of design; either order)
+/opsx:continue         # → design     (required; reads in-force docs/adr/)
+/opsx:continue         # → adr        (writes adr.md manifest; new ADRs go to docs/adr/)
+/opsx:continue         # → tasks      (requires specs AND adr)
 /opsx:continue         # → plan
 /opsx:apply            # writes apply.md
 /opsx:verify           # writes verify.md (requires apply.md)
@@ -133,7 +143,7 @@ v2 solves this by representing apply twice: a real artifact (`generates: apply.m
 
 In v2 the post-verify git closeout (PR creation / merge / worktree cleanup) lived only in the apply: block's step 5 — a place an agent that just ran `/opsx:verify` typically doesn't re-read. The verify artifact's PASS bullets said "proceed" without naming the next call site, so agents routinely jumped straight to `/opsx:archive`, skipping `superpowers:finishing-a-development-branch` entirely.
 
-v3 promotes `finalize` to a real DAG artifact (`generates: finalize.md`, `requires: [verify]`). `/opsx:continue` surfaces its instruction after verify completes, which invokes `superpowers:finishing-a-development-branch` and records the outcome. The recommended retrospective guidance moves from the apply: block (where it was misplaced — apply ends with verify) into finalize's instruction, where it belongs as a pre-archive activity. `/opsx:archive` is unchanged; it remains an OpenSpec CLI command that runs after finalize and is documented in `docs/workflow-details.md` Phase 6 with the canonical archive-before-merge golden path.
+v3 promotes `finalize` to a real DAG artifact (`generates: finalize.md`, `requires: [verify]`). `/opsx:continue` surfaces its instruction after verify completes, which invokes `superpowers:finishing-a-development-branch` and records the outcome. The recommended retrospective guidance moves from the apply: block (where it was misplaced — apply ends with verify) into finalize's instruction, where it belongs as a pre-archive activity. `/opsx:archive` is unchanged; it remains an OpenSpec CLI command that runs after finalize and is documented in INTEGRATION.md §4 Step 5 with the canonical archive-before-merge golden path.
 
 ### Why We Own the Git-Side Closeout's Logic Instead of Calling the Skill (v4)
 
@@ -146,6 +156,22 @@ The skill's "base branch" is `main`; its "feature branch" is the worktree branch
 
 v4's resolution: the schema executes the git-side closeout directly (merge worktree → feature branch → push → code-reviewer comment if a PR exists). Two narrow pieces are borrowed from the skill with explicit attribution and a documented recreation method — the worktree-cleanup provenance guard and the test-verify → merge → test-verify → cleanup structural pattern. The schema-executed closeout handles both the "spec pre-review PR exists" and "no PR yet" cases cleanly — when a PR exists, the push updates it and the comment subroutine posts; when no PR exists, the push creates the remote tracking branch and the comment subroutine self-skips. The skill remains a first-class manual escape hatch for the truly off-canonical flows (solo merge-to-main, brand-new PR via the skill, keep-as-is, discard).
 
+### Why design Is Mandatory and adr Gates tasks (v5)
+
+Borrowed from the [`intent-driven`](https://github.com/intent-driven-dev/openspec-schemas/tree/main/openspec/schemas/intent-driven) schema (MIT).
+
+Through v4, `design` required `brainstorm` and nothing required `design`. Two consequences: a design could legally be authored before the proposal existed, and `tasks` was reachable with no design at all — so architectural decisions were skipped silently rather than deliberately. Worse, whatever design did get written stayed inside `openspec/changes/<name>/` and was archived with the change, so it constrained nothing afterwards.
+
+v5 makes `design.requires: [proposal]`, adds an `adr` artifact requiring `design`, and makes `tasks.requires: [specs, adr]`. The `adr` step writes a change-local review manifest (`adr.md`, the completion marker) and, only for decisions that will outlive the change, immutable numbered ADR files in the repository's `docs/adr/` folder — outside `openspec/`, so archive cannot bury them. Accepted ADRs are never edited; a later decision records a new ADR with `Supersedes:` and the design step walks those links to know what is still in force.
+
+Cost: every change now needs a design and an ADR manifest, including small ones. The manifest is cheap when there is nothing to record ("no major durable architectural decisions were introduced"), and that is the point — the decision to have no architectural decision becomes explicit and reviewable.
+
+### Why Scenarios Use Gherkin GIVEN/WHEN/THEN (v5)
+
+Delta specs use bold-bullet `- **GIVEN** / **WHEN** / **THEN**` steps, matching `intent-driven`. The `gherkin-authoring` skill (vendored from [intent-driven-dev/skills](https://github.com/intent-driven-dev/skills), MIT) is invoked by the specs artifact to keep steps in domain language with observable outcomes.
+
+Deliberately **not** adopted: `spec-as-source`, which replaces bullet steps with column-0 ```gherkin fences and treats specs as an executable acceptance suite. It is not installed. It requires the `acceptance-test-authoring` skill plus a standalone cucumber/behave project at `acceptance-tests/` — a second test stack beside this repo's Nx + jest suite, with BDD zone rules that forbid committing `openspec/` and code files in one unit of work. Adopting it is a deliberate decision, not a style tweak; see `openspec/config.yaml`.
+
 ### Fallback Strategy
 
 If Superpowers skills are unavailable (not installed, version incompatible, etc.), each instruction includes a fallback path:
@@ -153,3 +179,5 @@ If Superpowers skills are unavailable (not installed, version incompatible, etc.
 - plan → Manually write plan.md
 - apply → Standard task-by-task manual implementation
 - finalize → Run the git operations manually (merge / push / open PR / comment) and author finalize.md directly from templates/finalize.md
+
+The apply phase no longer depends on any worktree skill: `superpowers:using-git-worktrees` was removed in superpowers 6.x, so apply step 1 creates the worktree directly (native harness worktree control, else `git worktree add .worktrees/<change-name>`).

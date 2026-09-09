@@ -1,13 +1,13 @@
 schema: superspec
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context (shown to AI when creating artifacts)
+context: |
+  Nx monorepo `@zen/source`: Angular 22 portal + NestJS 11 api under apps/,
+  shared libs under libs/ (auth, common, components, graphql, main, nest-auth).
+  Prisma 6 + GraphQL codegen. TypeScript 6, jest 30.
+  pnpm only — a preinstall guard rejects npm and yarn. Never write `npx`.
+  Tests are colocated `*.spec.ts` beside the file they cover; run them with
+  `pnpm exec nx test <project>`.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
@@ -30,3 +30,58 @@ schema: superspec
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+
+# Gherkin scenarios (see openspec/schemas/superspec/templates/spec.md)
+# Delta specs use bold-bullet GIVEN/WHEN/THEN steps, the `intent-driven`
+# schema's style. The `gherkin-authoring` skill (.claude/skills/,
+# .agents/skills/) is invoked by the specs artifact.
+# NOT adopted: `spec-as-source` (fenced ```gherkin + executable acceptance
+# suite). It needs the `acceptance-test-authoring` skill and a standalone
+# cucumber/behave project at `acceptance-tests/` — a second test stack beside
+# this repo's Nx + jest. Do not reach for it without deciding that first.
+
+rules:
+  tasks:
+    - >-
+      Whenever the change touches delta specs, the final task MUST be
+      `openspec validate <change> --type change --strict` — run and passing
+      before archive.
+    - >-
+      Every task that writes code under apps/ or libs/ MUST name the
+      colocated `*.spec.ts` it drives, because the tdd-guard PreToolUse hook
+      denies new implementation files that have no spec beside them.
+    - >-
+      Honor the in-force ADRs listed in this change's adr.md. If a task would
+      contradict one, stop and record a superseding ADR instead.
+
+operations:
+  apply:
+    guidance:
+      - >-
+        Step 1 (Workspace): superpowers 6.3.0 does NOT ship
+        `superpowers:using-git-worktrees` — it was removed in the worktree
+        rototill, though subagent-driven-development's SKILL.md still cites it.
+        Do not try to invoke it. Instead create the worktree yourself:
+        prefer the harness's native worktree control (Claude Code:
+        EnterWorktree), which also re-roots CLAUDE_PROJECT_DIR so this repo's
+        hooks apply normally. If unavailable, run
+        `git worktree add .worktrees/<change-name> -b <branch>` from the repo
+        root — `.worktrees/` is where this repo's hooks expect to find it.
+      - >-
+        After creating the worktree, run `pnpm install` inside it before the
+        first task. A fresh worktree has no node_modules, so `nx test` and
+        `nx lint` cannot run there — and the auto-test hook stays silent rather
+        than reporting the crash, so a missing install looks like passing tests.
+        This repo rejects npm and yarn (see the preinstall guard).
+      - >-
+        Step 2a (Executor): the `Executor:` field in apply.md is self-reported
+        and verify does not check it. If subagent-driven-development was not
+        actually used, say so in the receipt rather than writing the default.
+      - >-
+        TDD is enforced twice over and both layers reach into the worktree: the
+        superpowers TDD skill (deletes implementation written before a failing
+        test) and this repo's tdd-guard PreToolUse hook (denies creating new
+        implementation code under apps|libs src with no colocated spec).
+        Expect the hook to block implementer subagents that skip RED; that is
+        the guard working, not a tooling fault. `ZEN_TDD_GUARD=off` is the
+        escape hatch, and using it should be mentioned in apply.md.

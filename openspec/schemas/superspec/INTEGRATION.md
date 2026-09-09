@@ -21,7 +21,6 @@ The two are integrated through a custom schema [schema.yaml](./schema.yaml). The
 |---|---|---|---|
 | 1 | `superpowers:brainstorming` | `brainstorm` artifact instruction | Direct |
 | 2 | `superpowers:writing-plans` | `plan` artifact instruction | Direct |
-| 3 | `superpowers:using-git-worktrees` | apply step 1 | Direct |
 | 4 | `superpowers:subagent-driven-development` | apply step 2a | Direct |
 | 5 | `superpowers:test-driven-development` | (auto-triggered inside #4) | **Transitive** (SKILL.md L205 / L274) |
 | 6 | `superpowers:requesting-code-review` | (auto-triggered inside #4) | **Transitive** (SKILL.md L270) |
@@ -41,58 +40,68 @@ There is also one **fallback**:
 │  (root)      │     (2-3 approaches + Alternatives Considered)
 └──────┬───────┘
        │
-       ├──► ┌──────────┐
-       │    │ proposal │    Why (50-1000 chars) / What Changes / Capabilities
-       │    └────┬─────┘
-       │         │
-       │         ▼
-       │    ┌──────────────────┐
-       │    │ specs/**/*.md    │    ADDED / MODIFIED / REMOVED / RENAMED
-       │    │ (delta specs)    │    Each requirement includes SHALL/MUST + scenario
-       │    └────┬─────────────┘
-       │         │
-       │         ▼
-       │    ┌──────────┐
-       │    │  tasks   │    Coarse-grained checkboxes (tracking vehicle for apply)
-       │    └────┬─────┘
-       │         │
-       │         ▼
-       │    ┌──────────┐
-       │    │  plan    │ ◄── superpowers:writing-plans
-       │    └────┬─────┘     (2-5 minute micro-steps)
-       │         │
-       │         ▼
-       │    ┌──────────┐
-       │    │  apply   │ ◄── superpowers:using-git-worktrees
-       │    │ (DAG +   │ ◄── superpowers:subagent-driven-development
-       │    │  apply:  │         ├── superpowers:test-driven-development (transitive)
-       │    │  phase)  │         └── superpowers:requesting-code-review (transitive)
-       │    │ writes   │
-       │    │ apply.md │
-       │    └────┬─────┘
-       │         │
-       ▼         ▼
-    ┌──────────┐ ┌──────────┐
-    │  design  │ │  verify  │ ◄── openspec-verify-change (5 checks)
-    │(optional)│ └────┬─────┘
-    └──────────┘      │
-                      ▼
-                  ┌──────────┐
-                  │ finalize │ ◄── schema-executed git-side closeout (v4)
-                  │          │     writes finalize.md + optionally manages PR
-                  └──────────┘
-                      │
-                      ▼
-                  /opsx:archive  (not in DAG; OpenSpec CLI)
+       ▼
+  ┌──────────┐
+  │ proposal │    Why (50-1000 chars) / What Changes / Capabilities
+  └────┬─────┘
+       │
+       ├───────────────────────┐
+       ▼                       ▼
+  ┌──────────────────┐    ┌──────────┐
+  │ specs/**/*.md    │    │  design  │    Context / Goals / Decisions /
+  │ (delta specs)    │    │          │    Risks / Migration / Open Questions
+  │ ADDED / MODIFIED │    └────┬─────┘    reads in-force docs/adr/
+  │ REMOVED /RENAMED │         │
+  │ SHALL/MUST +     │         ▼
+  │ GIVEN/WHEN/THEN  │    ┌──────────┐
+  │ ◄── gherkin-     │    │   adr    │    adr.md manifest (completion marker)
+  │     authoring    │    │          │    + immutable docs/adr/NNNN-*.md
+  └────┬─────────────┘    └────┬─────┘
+       │                       │
+       └───────────┬───────────┘
+                   ▼
+              ┌──────────┐
+              │  tasks   │    Coarse-grained checkboxes (tracking vehicle
+              └────┬─────┘    for apply) + --strict validate task
+                   │
+                   ▼
+              ┌──────────┐
+              │  plan    │ ◄── superpowers:writing-plans
+              └────┬─────┘     (2-5 minute micro-steps)
+                   │
+                   ▼
+              ┌──────────┐
+              │  apply   │ ◄── superpowers:subagent-driven-development
+              │ (DAG +   │       ├── superpowers:test-driven-development (transitive)
+              │  apply:  │       └── superpowers:requesting-code-review (transitive)
+              │  phase)  │     worktree created directly (no skill; see §4 3-1)
+              │ writes   │
+              │ apply.md │
+              └────┬─────┘
+                   │
+                   ▼
+              ┌──────────┐
+              │  verify  │ ◄── openspec-verify-change (5 checks)
+              └────┬─────┘
+                   │
+                   ▼
+              ┌──────────┐
+              │ finalize │ ◄── schema-executed git-side closeout (v4)
+              │          │     writes finalize.md + optionally manages PR
+              └────┬─────┘
+                   │
+                   ▼
+              /opsx:archive  (not in DAG; OpenSpec CLI)
 ```
 
 **Key points**:
 
-- `design` is an **optional leaf**. Brainstorm still attempts to pre-populate design.md, but tasks no longer hard-depend on it (`tasks.requires: [specs]`). Per OpenSpec conventions: `design.md` is only written when non-trivial technical decisions need explanation.
+- `design` is **mandatory** as of v5 and requires `proposal` (it required `brainstorm` through v4, which allowed a design to precede the proposal). Brainstorm still pre-populates design.md when it produced one. `specs` and `design` are siblings off the proposal and can proceed in parallel.
+- `adr` (v5) requires `design` and generates `adr.md` — a per-change review manifest that is the completion marker. Repository-level ADR files live in the `docs/adr/` folder, **outside** `openspec/`, so `/opsx:archive` cannot bury them; accepted ADRs are immutable and are replaced only by a new ADR carrying `Supersedes:`. `tasks.requires: [specs, adr]`, so no task list exists until both the behaviour and the durable decisions are settled. Borrowed from the `intent-driven` schema (intent-driven-dev/openspec-schemas, MIT).
 - `apply` is a **real DAG node** as of schema v2. It generates `apply.md` (a minimal receipt — iteration counter, worktree, branch, commit range, task counts) so the DAG can honestly express "verify depends on apply having run." The canonical `/opsx:apply` instruction body still lives in the top-level `apply:` phase block; the apply artifact's own instruction is a short redirect to avoid drift.
 - `verify` requires `apply` (was `plan` in v1). The OpenSpec CLI will refuse to surface verify as a `ready` artifact until `apply.md` exists.
 - `finalize` is a **real DAG node** as of schema v3. It generates `finalize.md` (a minimal git-closeout receipt: outcome, PR URL, final branch state) and requires `verify`. `/opsx:continue` surfaces finalize's instruction after verify completes. As of schema v4 (see §4 Step 4 and §6 Design Choice #6), that instruction executes the git-side closeout directly (merge worktree → feature branch, push the branch — updating an existing spec pre-review PR if one exists, or creating a remote tracking branch otherwise — and post a code-reviewer comment when a PR is present); `superpowers:finishing-a-development-branch` is retained as a manual escape hatch only. `/opsx:archive` is the lifecycle close that follows finalize and is not in the DAG (it remains an OpenSpec CLI command).
-- The convergence loop (apply → verify → loop back on code-fixable FAILs, capped at 5 iterations) is documented in `docs/workflow-details.md`. The schema enforces the file-existence dependency; the iteration decision is made by the agent or by a future loop-runner command (not in scope for v2 or v3).
+- The convergence loop: apply → verify → loop back on code-fixable FAILs, capped at 5 iterations (see §4 Step 3-4). The schema enforces the file-existence dependency; the iteration decision is made by the agent or by a future loop-runner command (not in scope for v2 or v3).
 
 ---
 
@@ -140,7 +149,7 @@ Then:
 
 ---
 
-### Step 2: Sequentially Produce proposal → specs → tasks → plan
+### Step 2: Sequentially Produce proposal → (specs ∥ design → adr) → tasks → plan
 
 You can `/opsx:continue` step by step (with human review opportunity at each step), or `/opsx:ff` to fill in all remaining artifacts at once.
 
@@ -175,11 +184,13 @@ Before creating the worktree, confirm that `openspec/changes/<name>/` is tracked
 
 **Why this step is needed**: The worktree branches off from the current branch; if the change directory is still untracked on main, merging the worktree back to main later will hit an "untracked files would be overwritten by merge" error. This step separates "planning phase artifacts" and "implementation phase artifacts" into two commits, ensuring the main branch never has a drifting untracked copy.
 
-#### 3-1. Workspace — Invoke `superpowers:using-git-worktrees`
+#### 3-1. Workspace — Create the worktree directly
 
-- Creates an isolated workspace at `.worktrees/<change-name>/`
-- Switches to a new branch
-- Runs project setup, confirms clean test baseline
+`superpowers:using-git-worktrees` was removed in superpowers 6.x; apply step 1 no longer invokes any skill for this.
+
+- Prefer the harness's native worktree control (Claude Code: `EnterWorktree`), which re-roots the project dir so repo-local hooks keep applying
+- Otherwise `git worktree add .worktrees/<change-name> -b <change-name>` from the repo root
+- Install dependencies inside the worktree (`pnpm install`) and confirm a clean test baseline — a fresh worktree has no `node_modules`
 
 #### 3-2. Executor — Invoke `superpowers:subagent-driven-development` (2a default path)
 
@@ -335,7 +346,7 @@ In schema v1, `verify.requires: [plan]` was a deliberate lie — the comment sai
 
 In v2, `apply` is promoted to a real artifact (generating `apply.md`, a minimal receipt) so `verify.requires: [apply]` is honest. The schema graph and the actual sequencing now agree. The top-level `apply:` block is preserved so `/opsx:apply` continues to surface the canonical worktree+subagent instruction body — the apply artifact's own instruction is a short redirect to keep a single source of truth.
 
-This change also unlocks the documented apply → verify → repeat convergence loop, since `verify.md` outcomes can now feed cleanly back into a re-run of apply with an incremented iteration counter. See `docs/workflow-details.md` for the loop pattern.
+This change also unlocks the documented apply → verify → repeat convergence loop, since `verify.md` outcomes can now feed cleanly back into a re-run of apply with an incremented iteration counter. The loop pattern is in §4 Step 3-4.
 
 ### 6. Finalize is a real artifact, not a hidden phase (v3)
 
